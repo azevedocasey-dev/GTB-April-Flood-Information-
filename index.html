@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>April Flood Information and Response — GTB · Independent Research Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── CONFIGURATION — edit SHEET_ID below ── */
+:root {
+  --forest: #1a3d2b;
+  --forest-mid: #2d5a3d;
+  --amber: #c17f24;
+  --amber-light: #e8a83a;
+  --sand: #f2ede4;
+  --sand-dark: #e8dfd0;
+  --danger: #a02020;
+  --danger-bg: #fdf0f0;
+  --warn: #8a5a00;
+  --warn-bg: #fdf6e3;
+  --success: #1a5c35;
+  --success-bg: #eaf5ee;
+  --info: #1a3d6e;
+  --info-bg: #eef3fa;
+  --text: #1c1c1c;
+  --text-mid: #4a4a4a;
+  --text-soft: #767676;
+  --border: rgba(28,28,28,0.12);
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--text);line-height:1.6;min-height:100vh}
+
+/* header */
+.site-header{background:var(--forest);color:white;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--amber)}
+.header-inner{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.header-brand h1{font-family:'Fraunces',serif;font-size:20px;font-weight:300;color:white;line-height:1.2}
+.header-brand p{font-size:12px;color:rgba(255,255,255,.6);margin-top:3px}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:500;padding:4px 11px;border-radius:20px;white-space:nowrap}
+.badge-alert{background:var(--danger);color:white;animation:pulse 2s ease-in-out infinite}
+.badge-neutral{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.edit-mode-btn{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.8);cursor:pointer;transition:all .2s}
+.edit-mode-btn:hover{background:rgba(255,255,255,.1);color:white}
+.edit-mode-btn.active{background:var(--amber);color:white;border-color:var(--amber)}
+
+/* nav */
+.site-nav{background:var(--forest-mid);overflow-x:auto}
+.site-nav::-webkit-scrollbar{height:0}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex}
+.nav-btn{font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,.6);padding:10px 15px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s}
+.nav-btn:hover{color:white}
+.nav-btn.active{color:var(--amber-light);border-bottom-color:var(--amber-light);font-weight:500}
+
+/* layout */
+.main{max-width:1100px;margin:0 auto;padding:28px 24px 60px}
+.panel{display:none}
+.panel.active{display:block}
+.sl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text-soft);margin:22px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.sl:first-of-type{margin-top:0}
+
+/* edit mode overlay */
+.edit-banner{background:var(--amber);color:white;text-align:center;padding:8px;font-size:13px;font-weight:500;display:none}
+.edit-banner.show{display:block}
+.editable{position:relative;transition:outline .15s}
+body.editing .editable{outline:2px dashed var(--amber);outline-offset:2px;border-radius:4px;cursor:text}
+body.editing .editable:hover{outline-color:var(--forest);background:rgba(193,127,36,.05)}
+body.editing .editable:focus{outline:2px solid var(--forest);background:white}
+body.editing .editable[contenteditable="true"]{min-height:1.4em}
+.edit-label{display:none;position:absolute;top:-18px;left:0;font-size:10px;background:var(--amber);color:white;padding:2px 6px;border-radius:3px;white-space:nowrap;z-index:10;pointer-events:none}
+body.editing .editable:hover .edit-label{display:block}
+
+/* status select in edit mode */
+.status-select{display:none;font-size:11px;padding:2px 6px;border-radius:6px;border:1px solid var(--border);background:white;cursor:pointer;margin-left:6px}
+body.editing .status-select{display:inline-block}
+
+/* save button */
+.save-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--forest);color:white;padding:12px 24px;z-index:200;align-items:center;justify-content:space-between;gap:12px}
+.save-bar.show{display:flex}
+.save-bar p{font-size:13px;color:rgba(255,255,255,.8)}
+.save-bar-btns{display:flex;gap:10px}
+.btn-save{background:var(--amber);color:white;border:none;border-radius:var(--radius);padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.btn-exit{background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.3);border-radius:var(--radius);padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+
+/* cards & layout */
+.card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.metric{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.metric-label{font-size:11px;color:var(--text-soft);margin-bottom:4px}
+.metric-value{font-size:21px;font-weight:500;font-family:'Fraunces',serif;color:var(--forest)}
+.metric-sub{font-size:11px;color:var(--text-soft);margin-top:2px}
+
+/* alerts */
+.alert-banner{background:var(--danger-bg);border:1px solid rgba(160,32,32,.2);border-left:4px solid var(--danger);border-radius:var(--radius);padding:13px 16px;margin-bottom:18px;font-size:13px;color:var(--danger);line-height:1.7}
+.warn-banner{background:var(--warn-bg);border:1px solid rgba(138,90,0,.2);border-left:4px solid var(--amber);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--warn);line-height:1.7}
+.strength-box{background:var(--success-bg);border:1px solid rgba(26,92,53,.15);border-left:4px solid var(--success);border-radius:var(--radius);padding:14px 18px;margin:14px 0;font-size:13px;color:var(--success);line-height:1.75}
+.strength-box strong{font-weight:500;font-family:'Fraunces',serif;font-size:15px;display:block;margin-bottom:4px}
+
+/* timeline */
+.timeline{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px}
+.tl-row{display:flex;border-bottom:1px solid var(--border)}
+.tl-row:last-child{border-bottom:none}
+.tl-date{min-width:90px;padding:10px 14px;font-size:11px;color:var(--text-soft);background:var(--sand);border-right:1px solid var(--border);display:flex;align-items:flex-start;padding-top:12px}
+.tl-body{padding:10px 14px;font-size:13px;color:var(--text-mid);line-height:1.5;flex:1}
+.tl-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;font-weight:500}
+.tg-crit{background:var(--danger-bg);color:var(--danger)}
+.tg-warn{background:var(--warn-bg);color:var(--warn)}
+.tg-ok{background:var(--success-bg);color:var(--success)}
+.tg-info{background:var(--info-bg);color:var(--info)}
+
+/* gauges */
+.gauge-table{width:100%;border-collapse:collapse;font-size:13px}
+.gauge-table th{text-align:left;padding:8px 12px;font-size:10px;font-weight:500;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);background:var(--sand)}
+.gauge-table td{padding:9px 12px;color:var(--text-mid);border-bottom:1px solid var(--border);vertical-align:middle}
+.gauge-table tr:last-child td{border-bottom:none}
+.gauge-table a{color:#2e6a9e;text-decoration:none;font-size:12px}
+.gauge-table a:hover{text-decoration:underline}
+.sp-flood{background:var(--danger-bg);color:var(--danger);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.sp-warn{background:var(--warn-bg);color:var(--warn);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.sp-major{background:var(--danger);color:white;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.sp-ok{background:var(--success-bg);color:var(--success);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+.sp-loading{background:var(--sand-dark);color:var(--text-soft);font-size:10px;padding:2px 8px;border-radius:10px}
+.live-tag{font-size:10px;background:var(--success-bg);color:var(--success);padding:1px 6px;border-radius:8px;margin-left:5px;font-weight:500}
+
+/* counties */
+.county-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:14px}
+.county-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.county-header{padding:13px 16px;cursor:pointer;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.county-header:hover{background:var(--sand)}
+.county-name{font-size:14px;font-weight:500;color:var(--text)}
+.county-sub{font-size:11px;color:var(--text-soft);margin-top:2px;line-height:1.4}
+.county-body{display:none;padding:12px 16px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-mid);line-height:1.7}
+.county-body.open{display:block}
+.county-body a{color:#2e6a9e;text-decoration:none}
+.county-body a:hover{text-decoration:underline}
+.sc{font-size:10px;padding:3px 9px;border-radius:10px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.sc-critical{background:var(--danger-bg);color:var(--danger)}
+.sc-warning{background:var(--warn-bg);color:var(--warn)}
+.sc-ok{background:var(--success-bg);color:var(--success)}
+.chev{font-size:11px;color:var(--text-soft);transition:transform .2s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+.gtb-note{background:var(--success-bg);border-radius:6px;padding:8px 11px;margin-top:8px;font-size:12px;color:var(--success);line-height:1.6}
+.dam-note{background:var(--warn-bg);border-radius:6px;padding:8px 11px;margin:8px 0;font-size:12px;color:var(--warn);line-height:1.6}
+.bridge-note{background:var(--danger-bg);border-radius:6px;padding:8px 11px;margin:8px 0;font-size:12px;color:var(--danger);line-height:1.6}
+.county-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.county-links a{font-size:11px;color:#2e6a9e;text-decoration:none;padding:3px 9px;border:1px solid var(--border);border-radius:10px}
+.county-links a:hover{background:var(--sand)}
+
+/* sites */
+.site-list{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px}
+.site-row{display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);align-items:flex-start}
+.site-row:last-child{border-bottom:none}
+.site-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dot-confirmed{background:#ef4444}
+.dot-likely{background:#f59e0b}
+.dot-unknown{background:#9ca3af}
+.site-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.site-desc{font-size:12px;color:var(--text-soft);line-height:1.5}
+.site-cluster{font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.cl-boardman{background:#e8f0fb;color:#1a3d6e}
+.cl-crystal{background:var(--success-bg);color:var(--success)}
+.cl-north{background:#f0eafa;color:#5c35a0}
+
+/* contacts */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:14px}
+.contact-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.contact-role{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.contact-org{font-size:11px;color:var(--text-soft);margin-bottom:7px}
+.contact-detail{font-size:12px;color:var(--text-mid);line-height:1.9}
+.contact-detail a{color:#2e6a9e;text-decoration:none}
+.contact-detail a:hover{text-decoration:underline}
+.ctag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:5px;margin-right:3px;font-weight:500}
+.ctag-gtb{background:var(--success-bg);color:var(--success)}
+.ctag-federal{background:#e8f0fb;color:#1a3d6e}
+.ctag-state{background:var(--warn-bg);color:var(--warn)}
+.ctag-county{background:var(--sand-dark);color:var(--text-soft)}
+.ctag-urgent{background:var(--danger-bg);color:var(--danger)}
+.emerg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:16px}
+.emerg-item{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.emerg-label{font-size:11px;color:var(--text-soft);margin-bottom:3px}
+.emerg-num{font-size:16px;font-weight:500;font-family:'Fraunces',serif;color:var(--forest)}
+.emerg-num a{color:inherit;text-decoration:none}
+
+/* mission */
+.mission-block{background:var(--forest);color:white;border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:20px}
+.mission-eyebrow{font-size:10px;color:var(--amber-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.mission-text{font-family:'Fraunces',serif;font-size:16px;font-weight:300;font-style:italic;color:rgba(255,255,255,.9);line-height:1.8}
+.mission-source{font-size:11px;color:rgba(255,255,255,.4);margin-top:12px}
+.mission-source a{color:var(--amber-light);text-decoration:none}
+
+/* season */
+.season-bar{background:var(--forest);color:white;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px}
+.season-icon{font-size:24px;flex-shrink:0}
+.season-title{font-family:'Fraunces',serif;font-size:16px;font-weight:300;color:white}
+.season-anishinaabe{font-size:11px;color:var(--amber-light);margin-top:2px}
+.season-desc{font-size:12px;color:rgba(255,255,255,.7);margin-top:5px;line-height:1.6}
+
+/* eco */
+.eco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:14px}
+.eco-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.eco-cat{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin-bottom:5px}
+.eco-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.eco-body{font-size:12px;color:var(--text-mid);line-height:1.65}
+.eco-strength{font-size:12px;color:var(--success);margin-top:7px;line-height:1.5;font-style:italic}
+.eco-watch{font-size:12px;color:var(--warn);margin-top:4px;line-height:1.5}
+
+/* fema */
+.paths{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:12px}
+.path-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;cursor:pointer;transition:all .15s}
+.path-card:hover{background:var(--sand)}
+.path-card.active{border:2px solid #2e6a9e;background:var(--info-bg)}
+.path-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.path-sub{font-size:12px;color:var(--text-mid);line-height:1.5}
+.path-tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:10px;margin-top:6px}
+.pt-direct{background:var(--success-bg);color:var(--success)}
+.pt-coord{background:var(--warn-bg);color:var(--warn)}
+.pt-managed{background:var(--sand-dark);color:var(--text-soft)}
+.detail-box{background:var(--sand);border-radius:var(--radius);padding:13px 16px;font-size:13px;color:var(--text-mid);line-height:1.75;margin-bottom:14px}
+.threshold-row{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.threshold-row:last-child{border-bottom:none}
+.tn{font-size:13px;color:var(--text);flex:1}
+.tv{font-size:13px;font-weight:500;color:var(--forest);font-family:'Fraunces',serif}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.checklist-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.checklist-row:last-child{border-bottom:none}
+.checklist-date{min-width:80px;font-size:11px;color:var(--text-soft);flex-shrink:0;padding-top:2px}
+.checklist-text{font-size:13px;color:var(--text-mid);line-height:1.5;flex:1}
+
+/* news */
+.feed-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border-bottom:none}
+.feed-source{font-size:11px;color:var(--text-soft);margin-bottom:2px}
+.feed-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.feed-title a{color:inherit;text-decoration:none}
+.feed-title a:hover{color:#2e6a9e;text-decoration:underline}
+.feed-desc{font-size:12px;color:var(--text-mid);line-height:1.5}
+.statement-card{border-left:3px solid #2e6a9e;border-radius:0 var(--radius) var(--radius) 0;background:var(--info-bg);padding:12px 15px;margin-bottom:10px}
+.statement-who{font-size:10px;font-weight:500;color:var(--info);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.statement-quote{font-family:'Fraunces',serif;font-size:14px;font-weight:300;font-style:italic;color:var(--text);line-height:1.7}
+.statement-context{font-size:11px;color:var(--text-soft);margin-top:5px}
+.strength-statement{border-color:var(--success);background:var(--success-bg)}
+.strength-statement .statement-who{color:var(--success)}
+.strength-statement .statement-quote{color:var(--forest)}
+
+/* notes */
+.notes-area{width:100%;background:white;border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;resize:vertical;min-height:90px;line-height:1.6;margin-bottom:10px}
+.notes-area:focus{outline:none;border-color:#2d5a3d}
+
+/* buttons */
+.news-filter-btn{font-size:12px;padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--text-soft);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.news-filter-btn:hover{background:var(--sand)}
+.news-filter-btn.active{background:var(--forest);color:white;border-color:var(--forest)}
+.photo-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.photo-card img{width:100%;height:160px;object-fit:cover;display:block;background:var(--sand-dark)}
+.photo-card-body{padding:10px 12px}
+.photo-site{font-size:11px;font-weight:500;color:var(--forest);margin-bottom:3px}
+.photo-desc{font-size:12px;color:var(--text-mid);line-height:1.5;margin-bottom:5px}
+.photo-meta{font-size:11px;color:var(--text-soft)}
+.photo-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;margin-left:4px}
+.pt-major{background:var(--danger-bg);color:var(--danger)}
+.pt-moderate{background:var(--warn-bg);color:var(--warn)}
+.pt-minor{background:var(--success-bg);color:var(--success)}
+.pt-fema{background:#e8f0fb;color:var(--info)}
+.news-item{padding:11px 0;border-bottom:1px solid var(--border)}
+.news-item:last-child{border-bottom:none}
+.news-date{font-size:11px;color:var(--text-soft);margin-bottom:2px}
+.news-headline{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.news-headline a{color:inherit;text-decoration:none}
+.news-headline a:hover{color:#2e6a9e;text-decoration:underline}
+.news-source{font-size:12px;color:var(--text-soft);margin-bottom:4px}
+.news-summary{font-size:12px;color:var(--text-mid);line-height:1.55}
+.news-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;font-weight:500}
+.nt-flood{background:var(--info-bg);color:var(--info)}
+.nt-tribal{background:#f0eafa;color:#5c35a0}
+.nt-ecology{background:var(--success-bg);color:var(--success)}
+.nt-fema{background:var(--warn-bg);color:var(--warn)}
+.nt-strength{background:var(--success-bg);color:var(--success)}
+.btn-outline{background:transparent;color:var(--forest);border:1px solid var(--border);border-radius:var(--radius);padding:7px 15px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:all .15s}
+.btn-outline:hover{background:var(--sand)}
+
+/* loading */
+.loading-state{text-align:center;padding:32px;color:var(--text-soft);font-size:13px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--forest);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-state{background:var(--danger-bg);border:1px solid rgba(160,32,32,.2);border-radius:var(--radius);padding:14px;font-size:13px;color:var(--danger);margin-bottom:14px}
+
+.media-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.media-card img{width:100%;height:160px;object-fit:cover;display:block;background:var(--sand-dark)}
+.media-card-body{padding:10px 13px}
+.media-type-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:500;margin-bottom:5px}
+.mb-photo{background:var(--info-bg);color:var(--info)}
+.mb-video{background:#fdf0ff;color:#6b21a8}
+.mb-note{background:var(--success-bg);color:var(--success)}
+.mb-link{background:var(--sand-dark);color:var(--text-soft)}
+.media-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.media-title a{color:inherit;text-decoration:none}
+.media-title a:hover{color:#2e6a9e;text-decoration:underline}
+.media-desc{font-size:12px;color:var(--text-mid);line-height:1.5;margin-bottom:5px}
+.media-meta{font-size:11px;color:var(--text-soft)}
+.media-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;margin-left:4px}
+.mt-major{background:var(--danger-bg);color:var(--danger)}
+.mt-moderate{background:var(--warn-bg);color:var(--warn)}
+.mt-minor{background:var(--success-bg);color:var(--success)}
+.mt-fema{background:var(--info-bg);color:var(--info)}
+.news-item{padding:11px 0;border-bottom:1px solid var(--border)}
+.news-item:last-child{border-bottom:none}
+.news-date{font-size:11px;color:var(--text-soft);margin-bottom:2px}
+.news-headline{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.news-headline a{color:inherit;text-decoration:none}
+.news-headline a:hover{color:#2e6a9e;text-decoration:underline}
+.news-summary{font-size:12px;color:var(--text-mid);line-height:1.55}
+.news-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;font-weight:500}
+.nt-flood{background:var(--info-bg);color:var(--info)}
+.nt-tribal{background:#f0eafa;color:#5c35a0}
+.nt-ecology{background:var(--success-bg);color:var(--success)}
+.nt-fema{background:var(--warn-bg);color:var(--warn)}
+.nt-strength{background:var(--success-bg);color:var(--success)}
+.map-link-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;transition:background .15s}
+.map-link-card:hover{background:var(--sand)}
+.map-link-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.map-link-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.map-link-desc{font-size:12px;color:var(--text-mid);line-height:1.55;margin-bottom:4px}
+.map-link-source{font-size:11px;color:var(--text-soft)}
+.safety-item{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:10px}
+.safety-item:last-child{margin-bottom:0}
+.safety-heading{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px;line-height:1.4}
+.safety-body{font-size:13px;color:var(--text-mid);line-height:1.75}
+.safety-source{font-size:11px;color:var(--text-soft);margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.safety-source a{color:#2e6a9e;text-decoration:none}
+.safety-active .safety-item{border-left:3px solid var(--danger)}
+.safety-returning .safety-item{border-left:3px solid var(--amber)}
+.safety-food .safety-item{border-left:3px solid var(--success)}
+.safety-elders .safety-item{border-left:3px solid #2e6a9e}
+/* footer */
+.site-footer{background:var(--forest);color:rgba(255,255,255,.6);padding:24px;font-size:12px;line-height:1.8;margin-top:40px}
+.site-footer a{color:var(--amber-light);text-decoration:none}
+.site-footer strong{color:rgba(255,255,255,.85);font-weight:500}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;gap:32px;flex-wrap:wrap;justify-content:space-between}
+.footer-col{min-width:200px}
+.footer-disclaimer{max-width:1100px;margin:16px auto 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.35)}
+
+@media(max-width:600px){
+  .header-inner{padding:12px 16px}
+  .main{padding:20px 16px 40px}
+  .two-col{grid-template-columns:1fr}
+  .nav-btn{padding:9px 11px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── EDIT BANNER ── -->
+<div class="edit-banner" id="edit-banner">
+  ✏️ Edit mode active — click any highlighted text to edit directly. Changes are saved in your browser.
+</div>
+
+<!-- ── SAVE BAR ── -->
+<div class="save-bar" id="save-bar">
+  <p>You have unsaved edits. Download the updated page to save permanently.</p>
+  <div class="save-bar-btns">
+    <button class="btn-exit" onclick="exitEditMode()">Exit without saving</button>
+    <button class="btn-save" onclick="downloadPage()">Download updated page</button>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <h1>Flood Information and Response — Grand Traverse Band of Ottawa and Chippewa Indians Region</h1>
+      <p>Independent research dashboard · Made in solidarity with GTB · 6-County Reference Area · April 2026</p>
+    </div>
+    <div class="header-right">
+      <span class="badge badge-alert">● Emergency Active</span>
+      <span class="badge badge-neutral" id="ts-badge">Loading…</span>
+      <span class="badge badge-neutral" id="data-status">⟳ Loading…</span>
+      <button class="edit-mode-btn" id="edit-btn" onclick="toggleEditMode()">✏️ Edit page</button>
+    </div>
+  </div>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" onclick="showPanel('overview')">Overview</button>
+      <button class="nav-btn" onclick="showPanel('safety')">Safety &amp; What To Do</button>
+      <button class="nav-btn" onclick="showPanel('alerts')">Alerts &amp; News</button>
+      <button class="nav-btn" onclick="showPanel('science')">River Science</button>
+      <button class="nav-btn" onclick="showPanel('counties')">6-County Status</button>
+      <button class="nav-btn" onclick="showPanel('ecological')">Ecological &amp; Cultural</button>
+      <button class="nav-btn" onclick="showPanel('sites')">Sites</button>
+      <button class="nav-btn" onclick="showPanel('media')">Media</button>
+      <button class="nav-btn" onclick="showPanel('news')">News</button>
+      <button class="nav-btn" onclick="showPanel('mission')">Mission &amp; Values</button>
+      <button class="nav-btn" onclick="showPanel('fema')">FEMA &amp; Recovery</button>
+      <button class="nav-btn" onclick="showPanel('contacts')">Contacts</button>
+    </div>
+  </nav>
+</header>
+
+<main class="main">
+
+<!-- ════════════════════ OVERVIEW ════════════════════ -->
+<section id="panel-overview" class="panel active">
+
+  <!-- About this dashboard -->
+  <div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:18px;display:flex;align-items:flex-start;gap:14px">
+    <div style="font-size:22px;flex-shrink:0">🤝</div>
+    <div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">About this dashboard</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.7">
+       Built by an independent researcher and volunteer, in solidarity with the Grand Traverse Band of Ottawa and Chippewa Indians to support capacity, coordination, and responsible information sharing during the April 2026 flood emergency. I am a PhD (in progress) researcher focused on river restoration and community-based environmental work. Through my ongoing collaboration in this watershed and with GTB’s Natural Resource Department staff, I felt a responsibility to contribute in a practical way during the flood response. This site is one small effort to support information sharing and coordination using publicly available data. This is not an official GTB government publication — it is a research and coordination tool made freely available to support the Tribe's response and recovery work. All framing reflects my interpretation of GTB's own stated mission, goals, and values. This site references the six-county service area commonly used for coordination and public information. These boundaries are included for practical purposes and do not reflect the full scope of the GTB’s relationships to land, water, and stewardship. Any errors or omissions are my own. Updates, corrections, or resources to share are welcome. 
+      <a href="mailto:eaacasey@gmail.com" style="color:var(--amber-light)">eaacasey@gmail.com</a>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap">
+        <a href="https://www.gtbindians.org" target="_blank" style="font-size:11px;color:#2e6a9e;text-decoration:none">gtbindians.org ↗</a>
+        <a href="https://www.gtbindians.org/naturalresources.asp" target="_blank" style="font-size:11px;color:#2e6a9e;text-decoration:none">GTB Natural Resources ↗</a>
+        <a href="https://www.gtbindians.org/tribal_council.asp" target="_blank" style="font-size:11px;color:#2e6a9e;text-decoration:none">GTB 2025 Goals & Objectives ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-banner" id="alert-main-text">
+    Loading current situation…
+  </div>
+  <div class="strength-box">
+    <strong>A note on resilience</strong>
+    <span id="strength-main-text">Loading…</span>
+  </div>
+
+  <div class="sl">Key metrics</div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">State emergency</div><div class="metric-value">Active</div><div class="metric-sub">32 Michigan counties</div></div>
+    <div class="metric"><div class="metric-label">GTB counties</div><div class="metric-value">6 / 6</div><div class="metric-sub">Full service area</div></div>
+    <div class="metric"><div class="metric-label">Restoration sites</div><div class="metric-value">13</div><div class="metric-sub">Across 3 clusters</div></div>
+    <div class="metric"><div class="metric-label">Season</div><div class="metric-value">Ziigwan</div><div class="metric-sub">Spring — fish runs, harvest</div></div>
+    <div class="metric"><div class="metric-label">FEMA cost share</div><div class="metric-value">75%</div><div class="metric-sub">With approved MHP</div></div>
+    <div class="metric"><div class="metric-label">USGS gauges</div><div class="metric-value" id="gauge-count">—</div><div class="metric-sub" id="gauge-sub">Checking live data…</div></div>
+  </div>
+
+  <div class="sl">Event timeline <span class="live-tag">from sheet</span></div>
+  <div class="timeline" id="timeline-container">
+    <div class="loading-state"><span class="spinner"></span>Loading timeline…</div>
+  </div>
+
+  <div class="sl">Live USGS stream gauges <span class="live-tag">live API data</span></div>
+  <div class="card" style="padding:0">
+    <table class="gauge-table">
+      <thead><tr><th>Station</th><th>Site #</th><th>Serves</th><th>Stage (ft)</th><th>Flow (cfs)</th><th>Status</th><th>Live</th></tr></thead>
+      <tbody id="gauge-table-body">
+        <tr><td colspan="7" class="loading-state"><span class="spinner"></span>Fetching live USGS data…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:var(--text-soft);margin-top:6px">
+    Live data from USGS Water Services API — updates on page load. &nbsp;
+    <a href="https://waterwatch.usgs.gov/?m=real&r=mi" target="_blank" style="color:#2e6a9e">WaterWatch Michigan map ↗</a> &nbsp;·&nbsp;
+    <a href="https://www.weather.gov/apx/" target="_blank" style="color:#2e6a9e">NWS Gaylord warnings ↗</a>
+  </p>
+
+
+  <div class="sl">Live webcam — Fish Pass / Union Street Dam</div>
+  <a href="https://share.earthcam.net/tJ90CoLmq7TzrY396Yd88BSzcKzggGqkO7kWwm9XNnQ!.tJ90CoLmq7TzrY396Yd88OtB8AoOfkbb5fZi_Ofcz8o!/union_street_dam_fishpass/camera/home" target="_blank" style="text-decoration:none;display:block;margin-bottom:14px">
+    <div style="background:var(--forest);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0"></span>
+          <span style="font-size:10px;font-weight:500;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em">Live camera</span>
+        </div>
+        <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:300;color:white;margin-bottom:3px">Fish Pass — Union Street Dam</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55)">Boardman River · Traverse City · EarthCam</div>
+        <div style="font-size:12px;color:var(--amber-light);margin-top:5px">View real-time conditions at the restoration site — opens in new tab ↗</div>
+      </div>
+      <div style="font-size:34px;flex-shrink:0">📷</div>
+    </div>
+  </a>
+
+
+  <div class="sl">Follow GTB for official tribal updates</div>
+  <a href="https://www.facebook.com/grandtraverseband" target="_blank" style="text-decoration:none;display:block;margin-bottom:14px">
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;gap:14px;transition:background .15s" onmouseover="this.style.background='var(--sand)'" onmouseout="this.style.background='white'">
+      <div style="font-size:28px;flex-shrink:0">📘</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px">Grand Traverse Band — Facebook</div>
+        <div style="font-size:12px;color:var(--text-mid);line-height:1.5">Official GTB Facebook page — the tribe posts real-time updates, road closures, emergency alerts, and community information here during active events.</div>
+        <div style="font-size:11px;color:var(--text-soft);margin-top:4px">facebook.com/grandtraverseband ↗</div>
+      </div>
+    </div>
+  </a>
+
+  <div class="sl">Press briefing</div>
+  <div class="warn-banner editable" contenteditable="false" data-key="press_briefing" data-label="Press briefing notice">
+    Loading…
+  </div>
+
+  <div class="sl">Field notes</div>
+  <div class="card">
+    <textarea class="notes-area" id="notes-main" placeholder="Add situation updates, site observations, damage notes, contacts made…"></textarea>
+    <button class="btn-outline" onclick="copyNotes('notes-main')">Copy notes</button>
+  </div>
+</section>
+
+<!-- ════════════════════ MISSION ════════════════════ -->
+<section id="panel-mission" class="panel">
+  <div class="mission-block">
+    <div class="mission-eyebrow">GTB Tribal Council · 2025 Goals & Objectives · Approved February 26, 2025</div>
+    <div class="mission-text editable" contenteditable="false" data-key="mission_statement" data-label="Mission statement">Loading…</div>
+    <div class="mission-source">
+      <a href="https://www.gtbindians.org/tribal_council.asp" target="_blank">gtbindians.org/tribal_council ↗</a> &nbsp;·&nbsp;
+      <a href="https://www.gtbindians.org/downloads/approval_of_2025_tribal_council_goals_and_objectives.pdf" target="_blank">Full 2025 Goals PDF ↗</a>
+    </div>
+  </div>
+  <div class="strength-box">
+    <strong>Flood recovery is mission work</strong>
+    <span class="editable" contenteditable="false" data-key="mission_recovery" data-label="Recovery framing">Loading…</span>
+  </div>
+  <div class="warn-banner editable" contenteditable="false" data-key="sovereignty_framing" data-label="Sovereignty framing">Loading…</div>
+
+  <div class="sl">2025 goals — flood recovery alignment</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px">
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Natural Resources & Environment</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Protect and restore the natural world for future generations</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">Fish Pass restoration demonstrably reduced flood damage. Spring steelhead and walleye runs active in flood-affected reaches — 1836 treaty rights provide legal standing to advocate for priority protection of spawning reaches. GTB's water quality monitoring provides baseline data for impact comparison.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Dedibinezowin — Sovereignty & Treaty Rights</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Preserve, strengthen, and assert tribal sovereignty</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">FEMA direct applicant path is an assertion of sovereignty — GTB defines what gets repaired, how, and on what timeline. Government-to-government coordination with FEMA Region 5 and county emergency managers is required. 1836 Treaty rights protect treaty fishery resource claims.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Kina Kitigaan — Food Sovereignty</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Strengthen food sovereignty through traditional practices</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">Ziigwan is the core food sovereignty season — ramps, fish runs, sugarbush, planting. Flooding has directly impacted gathering areas and treaty fisheries during the most critical harvest window. Document food access impacts for FEMA agricultural assistance eligibility.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Naadiziwin — Culture & Language</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Preserve, restore, and practice Anishinaabemowin</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">Mashkiigaki — "the swamp place" — the name encodes the original ecological identity of this restored wetland. Consult THPO and language keepers as part of damage assessment. This flood event is history — document it from the tribal perspective including the Fish Pass resilience story.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Public Safety & Health</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Exercise public safety consistent with sovereign authority</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">Health clinic access — confirm alternate routes and activate Regroup mass notification. Elder housing in low-lying areas is priority — cross-reference elder services routes against road closure map. Six-county health accessibility is a specific Tribal Council goal.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:10px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Financial Management</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Efficient, effective fiduciary management</div>
+      <div style="font-size:12px;color:var(--text-mid);line-height:1.65">Track all emergency expenditures with receipts from the start — FEMA Category B reimbursable. NOAA grant compliance — document all Lower River site impacts. Post-disaster HMGP window is now open for mitigation grant applications for Crystal crossings and Boardman infrastructure upgrades.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ COUNTIES ════════════════════ -->
+<section id="panel-counties" class="panel">
+  <div class="warn-banner editable" contenteditable="false" data-key="state_declaration" data-label="State declaration text">Loading…</div>
+  <div class="sl">County status <span class="live-tag">from sheet</span></div>
+  <div class="county-grid" id="county-grid">
+    <div class="loading-state"><span class="spinner"></span>Loading county data…</div>
+  </div>
+  <p style="font-size:11px;color:var(--text-soft);margin-top:4px">Status current as of last sheet update. Edit the Google Sheet to update county statuses.</p>
+</section>
+
+<!-- ════════════════════ SITES ════════════════════ -->
+<section id="panel-sites" class="panel">
+  <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.7">13 restoration sites across 3 clusters — derived from the GTB Natural Resources KML project file. All coordinates verified from the original Google Earth project.</p>
+
+  <div class="sl">Live webcam — Fish Pass / Union Street Dam</div>
+  <a href="https://share.earthcam.net/tJ90CoLmq7TzrY396Yd88BSzcKzggGqkO7kWwm9XNnQ!.tJ90CoLmq7TzrY396Yd88OtB8AoOfkbb5fZi_Ofcz8o!/union_street_dam_fishpass/camera/home" target="_blank" style="text-decoration:none;display:block;margin-bottom:16px">
+    <div style="background:var(--forest);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;animation:pulse 1.5s ease-in-out infinite;flex-shrink:0"></span>
+          <span style="font-size:10px;font-weight:500;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em">Live camera</span>
+        </div>
+        <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:300;color:white;margin-bottom:3px">Fish Pass — Union Street Dam</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55)">Boardman River · Traverse City · EarthCam</div>
+        <div style="font-size:12px;color:var(--amber-light);margin-top:5px">View real-time conditions at the restoration site — opens in new tab ↗</div>
+      </div>
+      <div style="font-size:34px;flex-shrink:0">📷</div>
+    </div>
+  </a>
+
+
+  <div class="sl">Boardman River cluster — Grand Traverse County <span class="live-tag">from sheet</span></div>
+  <div class="site-list" id="sites-boardman"><div class="loading-state"><span class="spinner"></span>Loading…</div></div>
+
+  <div class="sl">Crystal River cluster — Wexford / Benzie County</div>
+  <div class="site-list" id="sites-crystal"><div class="loading-state"><span class="spinner"></span>Loading…</div></div>
+
+  <div class="sl">North cluster — Emmet County</div>
+  <div class="site-list" id="sites-north"><div class="loading-state"><span class="spinner"></span>Loading…</div></div>
+
+  <p style="font-size:11px;color:var(--text-soft);margin-top:8px">🔴 Confirmed impact &nbsp;·&nbsp; 🟡 Likely impacted &nbsp;·&nbsp; ⚪ Unknown — update status in Google Sheet</p>
+</section>
+
+<!-- ════════════════════ ECOLOGICAL ════════════════════ -->
+<section id="panel-ecological" class="panel">
+  <div class="season-bar">
+    <div class="season-icon">🌿</div>
+    <div>
+      <div class="season-title">Ziigwan — Spring</div>
+      <div class="season-anishinaabe">Bebookwed-giizis · Broken Snowshoe Moon · April 2026</div>
+      <div class="season-desc editable" contenteditable="false" data-key="ziigwan" data-label="Seasonal description">Loading…</div>
+    </div>
+  </div>
+  <div class="sl">Priority environmental concerns — strengths-based</div>
+  <div class="eco-grid">
+    <div class="eco-card">
+      <div class="eco-cat">Fisheries · Boardman River</div>
+      <div class="eco-title">🔴 Fish Pass & spawning reaches</div>
+      <div class="eco-body">Active NOAA restoration site. Spring steelhead and walleye runs underway in flood-affected reaches. High turbidity and debris affect fish passage and spawning gravels.</div>
+      <div class="eco-strength">Strength: Recent restoration work likely reduced flood damage — documented example that ecological restoration and flood resilience are the same investment. GTB's 1836 treaty rights provide legal standing to advocate for priority protection of spawning reaches.</div>
+      <div class="eco-watch">Watch: Document all impacts before cleanup for NOAA grant reporting. Monitor turbidity and debris in spawning gravels.</div>
+    </div>
+    <div class="eco-card">
+      <div class="eco-cat">Infrastructure · Crystal River</div>
+      <div class="eco-title">🔴 Stream crossings 1–4</div>
+      <div class="eco-body">Four fish passage structures — all in active flood conditions. High flow can shift culverts, scour abutments, and block fish passage.</div>
+      <div class="eco-strength">Strength: Newly improved structures designed for higher flows. Damage documentation now protects grant warranty claims and FEMA Category C eligibility.</div>
+      <div class="eco-watch">Watch: Structural check before any vehicle traffic. Debris at inlets and scour around abutments.</div>
+    </div>
+    <div class="eco-card">
+      <div class="eco-cat">Food sovereignty · Traditional harvest</div>
+      <div class="eco-title">🔴 Spring gathering areas</div>
+      <div class="eco-body">Ramps (zhiibiins/wild leeks), fiddleheads, and spring greens at peak harvest in floodplain areas most impacted by flooding.</div>
+      <div class="eco-strength">Strength: Traditional knowledge of plant locations and flood patterns supports rapid assessment by community members and natural resource staff.</div>
+      <div class="eco-watch">Watch: Assess contamination risk before harvest resumes. Document gathering area damage as cultural resource impacts.</div>
+    </div>
+    <div class="eco-card">
+      <div class="eco-cat">Wetland restoration · Emmet County</div>
+      <div class="eco-title">🟡 Mashkiigaki</div>
+      <div class="eco-body">Restored wetland (former Timber Shores Campground). Mashkiigaki means "the swamp place" in Anishinaabemowin — the name encodes this land's original ecological identity.</div>
+      <div class="eco-strength">Strength: Wetland restoration aligned with the land's original character. Wetlands absorb flood energy and protect downstream areas.</div>
+      <div class="eco-watch">Watch: Invasive species seed dispersal via floodwaters. Debris in restored areas.</div>
+    </div>
+    <div class="eco-card">
+      <div class="eco-cat">Water quality · Great Lakes watershed</div>
+      <div class="eco-title">🟡 Tributaries to Grand Traverse Bay</div>
+      <div class="eco-body">GTB territory drains to Grand Traverse Bay and Lake Michigan. Flood runoff carries nutrients, pathogens, and contaminants into tribal waters and the Great Lakes.</div>
+      <div class="eco-strength">Strength: GTB's existing water quality monitoring provides baseline data for impact comparison and documentation for EGLE and USEPA coordination.</div>
+      <div class="eco-watch">Watch: E. coli and turbidity in key reaches. Report anomalies to EGLE and USEPA Region 5.</div>
+    </div>
+    <div class="eco-card">
+      <div class="eco-cat">Cultural heritage · All sites</div>
+      <div class="eco-title">🟡 Sacred sites & cultural areas</div>
+      <div class="eco-body">Assess condition of sacred sites, burial grounds, and ceremonial areas in the flood extent. Flooding can expose or damage culturally significant places.</div>
+      <div class="eco-strength">Strength: GTB's THPO has formal role in recovery — NHPA Section 106 consultation is both a legal protection and an exercise of sovereignty.</div>
+      <div class="eco-watch">Watch: Consult THPO before any ground-disturbing recovery work near sensitive areas.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ SAFETY ════════════════════ -->
+<section id="panel-safety" class="panel">
+
+  <!-- Emergency numbers — always static, always visible -->
+  <div style="background:var(--danger);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+    <div style="flex:1;min-width:180px">
+      <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Emergency</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:white">Call 911</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">For life-threatening emergencies</div>
+    </div>
+    <div style="flex:1;min-width:180px">
+      <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">GTB Emergency Management</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:white"><a href="tel:2315347111" style="color:white;text-decoration:none">231-534-7111</a></div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">Non-emergency tribal coordination</div>
+    </div>
+    <div style="flex:1;min-width:180px">
+      <div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">GT County Central Dispatch</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:300;color:white"><a href="tel:2319224550" style="color:white;text-decoration:none">231-922-4550</a></div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">Grand Traverse County non-emergency</div>
+    </div>
+  </div>
+
+  <!-- GTB Regroup alerts — static -->
+  <div class="warn-banner" style="margin-bottom:18px">
+    <strong>Stay connected with GTB:</strong><br>
+    📘 <a href="https://www.facebook.com/grandtraverseband" target="_blank" style="color:var(--warn);font-weight:500">GTB Facebook page</a> — official tribal updates, real-time information, and community posts during active events<br>
+    🔔 <a href="https://embeds.regroupcloud.com/orgs/gtb/channels/gtb-general-notifications/signup_embed" target="_blank" style="color:var(--warn);font-weight:500">Sign up for GTB Regroup alerts</a> — GTB’s own notification system, independent of county alerts<br>
+    Also sign up for county alerts: Grand Traverse uses CodeRED · Charlevoix/Emmet use <a href="https://www.cceoa.com" target="_blank" style="color:var(--warn)">BeAlert (cceoa.com) ↗</a>
+  </div>
+
+  <!-- Safety tiers from sheet -->
+  <div class="sl">Current guidance <span class="live-tag">from sheet</span></div>
+  <p style="font-size:12px;color:var(--text-soft);margin-bottom:14px">Content below is managed from the <strong>safety</strong> tab in your Google Sheet. Each row has a tier (active/returning/food/elders), heading, body text, source, and an active (yes/no) column to show or hide entries as conditions change.</p>
+
+  <!-- Active flood tier -->
+  <div id="safety-tier-active" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--danger);display:inline-block;animation:pulse 1.5s ease-in-out infinite"></span>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--danger)">During active flooding</div>
+    </div>
+    <div id="safety-active-items" class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+
+  <!-- Returning home tier -->
+  <div id="safety-tier-returning" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--amber);display:inline-block;flex-shrink:0"></span>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--warn)">After water recedes — before returning</div>
+    </div>
+    <div id="safety-returning-items" class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+
+  <!-- Traditional foods tier -->
+  <div id="safety-tier-food" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--forest-light, #3d7a52);display:inline-block;flex-shrink:0"></span>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--success)">Traditional foods, water &amp; fishing</div>
+    </div>
+    <div id="safety-food-items" class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+
+  <!-- Elders and children tier -->
+  <div id="safety-tier-elders" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="width:10px;height:10px;border-radius:50%;background:#2e6a9e;display:inline-block;flex-shrink:0"></span>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--info)">Elders, children &amp; vulnerable community members</div>
+    </div>
+    <div id="safety-elders-items" class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+
+  <!-- Maps & Spatial Resources — static, always editable here -->
+  <div class="sl">Maps &amp; spatial resources</div>
+  <p style="font-size:12px;color:var(--text-soft);margin-bottom:12px">External mapping resources relevant to the flood response. Links open in a new tab.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:14px" id="map-links-grid">
+
+    <a href="https://maps.glifwc.org/#on=glifwc_public_labels/labels_ceded_territories;glifwc_labels/labels_great_lakes_noaa_70k;glifwc_labels/labels_tribal_lands;glifwc_labels/labels_tribe_ojibwemowin;glifwc_labels/labels_gidakiiminaan_river_names;glifwc_public_ceded/ceded_territories_polygons;glifwc_hydro_top/major_watersheds;glifwc_hydro_top/watersheds_huc12;glifwc_hydro_top/major_dams_natatlas2006;glifwc_hydro/rivers_merge;glifwc_hydro/great_lakes_noaa_70k&loc=364.3797507707479;-9507256.620360723;5610783.381253873" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">🗺</div>
+        <div>
+          <div class="map-link-title">GLIFWC — Gidakiiminaan</div>
+          <div class="map-link-desc">Ojibwemowin river &amp; place names, ceded territory, watersheds, tribal lands, dams. The cartographically appropriate base for this territory.</div>
+          <div class="map-link-source">maps.glifwc.org</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="https://waterwatch.usgs.gov/?m=real&r=mi" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">🌊</div>
+        <div>
+          <div class="map-link-title">USGS WaterWatch — Michigan</div>
+          <div class="map-link-desc">Live streamflow map. All gauges color-coded by flood status. Start here for real-time river conditions across all 6 GTB reference counties.</div>
+          <div class="map-link-source">waterwatch.usgs.gov</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="https://experience.arcgis.com/experience/362fc509ce3f4227b79bb6ed242e2de5" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">🚗</div>
+        <div>
+          <div class="map-link-title">Grand Traverse County — Road Closures</div>
+          <div class="map-link-desc">Live ArcGIS map. Red segments = closed roads. Updated by the GT County GIS team. Click any segment for road name.</div>
+          <div class="map-link-source">gtcountymi.gov</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="https://www.weather.gov/apx/FloodStmt" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">⚠️</div>
+        <div>
+          <div class="map-link-title">NWS Gaylord — Flood Statements</div>
+          <div class="map-link-desc">Active flood warnings, watches, and statements for all 6 GTB reference counties from the National Weather Service Gaylord office.</div>
+          <div class="map-link-source">weather.gov/apx</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="https://www.floodsmart.gov/flood-map-zone/find-flood-map" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">📋</div>
+        <div>
+          <div class="map-link-title">FEMA Flood Map Service Center</div>
+          <div class="map-link-desc">Official FEMA flood zone maps. Relevant for documenting impacts in relation to mapped flood zones for PA project worksheets.</div>
+          <div class="map-link-source">msc.fema.gov</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="https://www.michigan.gov/egle/about/organization/water-resources/flooding" target="_blank" style="text-decoration:none">
+      <div class="map-link-card">
+        <div class="map-link-icon">🏛</div>
+        <div>
+          <div class="map-link-title">Michigan EGLE — Flood Resources</div>
+          <div class="map-link-desc">State flood mapping, dam safety, and water quality resources. Relevant for permitting, environmental compliance, and stream disturbance during recovery.</div>
+          <div class="map-link-source">michigan.gov/egle</div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+  <p style="font-size:11px;color:var(--text-soft);margin-bottom:20px">Additional map resources welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e">eaacasey@gmail.com</a></p>
+
+  <!-- Static map placeholder -->
+  <div class="sl">Reference map — GTB restoration sites &amp; watershed</div>
+  <div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:8px">
+    <div id="static-map-container" style="width:100%;min-height:300px;background:var(--sand-dark);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;padding:32px;text-align:center">
+      <div style="font-size:32px">🗺️</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text)">Static map coming soon</div>
+      <div style="font-size:12px;color:var(--text-soft);max-width:400px;line-height:1.6">A reference map showing GTB restoration sites, the Boardman and Crystal River watersheds, and the 6-county reference area will be added here. To add your map: replace this placeholder with an &lt;img&gt; tag pointing to your map image, or upload a PNG to GitHub alongside index.html.</div>
+      <a href="https://maps.glifwc.org" target="_blank" style="font-size:12px;color:#2e6a9e;text-decoration:none;margin-top:4px">In the meantime, view the GLIFWC map ↗</a>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--text-soft);margin-bottom:4px">To add your map: save your QGIS or ArcGIS export as <code style="background:var(--sand);padding:1px 5px;border-radius:3px">map.png</code>, upload it to your GitHub repository alongside <code style="background:var(--sand);padding:1px 5px;border-radius:3px">index.html</code>, then replace the placeholder above with <code style="background:var(--sand);padding:1px 5px;border-radius:3px">&lt;img src="map.png" style="width:100%;display:block" alt="GTB watershed and restoration sites map"&gt;</code></p>
+
+</section>
+
+<!-- ════════════════════ ALERTS ════════════════════ -->
+<section id="panel-alerts" class="panel">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <span style="width:8px;height:8px;border-radius:50%;background:var(--danger);display:inline-block;animation:pulse 1.5s ease-in-out infinite"></span>
+    <span style="font-size:13px;font-weight:500;color:var(--danger)">Grand Traverse County — Local State of Emergency Active</span>
+  </div>
+
+  <div class="sl">Official statements <span class="live-tag">from sheet</span></div>
+  <div id="statements-container">
+    <div class="loading-state"><span class="spinner"></span>Loading statements…</div>
+  </div>
+
+  <div class="warn-banner editable" contenteditable="false" data-key="press_briefing" data-label="Press briefing">Loading…</div>
+
+  <div class="sl">County alert RSS feed <span class="live-tag">live</span></div>
+  <div class="card" id="rss-container">
+    <div class="loading-state"><span class="spinner"></span>Fetching Grand Traverse County alerts…</div>
+  </div>
+
+  <div class="sl">Regional news &amp; data sources</div>
+  <p style="font-size:12px;color:var(--text-soft);margin-bottom:10px">Sources covering the flood event across all 6 GTB reference counties. RSS feed URLs are shown where available — paste into Feedly or any feed reader for automatic updates.</p>
+  <div class="card">
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">GTB tribal information</div>
+    <div class="feed-item">
+      <div class="feed-source">Grand Traverse Band of Ottawa and Chippewa Indians <span style="background:var(--info-bg);color:var(--info);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">Facebook</span></div>
+      <div class="feed-title"><a href="https://www.facebook.com/grandtraverseband" target="_blank">GTB official Facebook page — tribal updates and community information ↗</a></div>
+      <div class="feed-desc">The tribe posts real-time updates, emergency alerts, and community information here during active events. <a href="https://www.gtbindians.org/pubinfo.asp" target="_blank" style="color:#2e6a9e">GTB public information page ↗</a></div>
+    </div>
+
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">Official alerts &amp; data</div>
+    <div class="feed-item">
+      <div class="feed-source">Grand Traverse County Alert Center <span style="background:var(--info-bg);color:var(--info);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">RSS</span></div>
+      <div class="feed-title"><a href="https://www.gtcountymi.gov/AlertCenter.aspx" target="_blank">Local State of Emergency — active official updates ↗</a></div>
+      <div class="feed-desc">RSS: <code style="font-size:11px;background:var(--sand);padding:1px 5px;border-radius:4px">gtcountymi.gov/RSSFeed.aspx?ModID=63&CID=All-0</code></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">USGS WaterWatch Michigan <span style="background:var(--success-bg);color:var(--success);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">Live</span></div>
+      <div class="feed-title"><a href="https://waterwatch.usgs.gov/?m=real&r=mi" target="_blank">Statewide streamflow map — all gauges color-coded by flood status ↗</a></div>
+      <div class="feed-desc">USGS WaterAlert email/text subscriptions per gauge: <a href="https://water.usgs.gov/wateralert/" target="_blank" style="color:#2e6a9e">water.usgs.gov/wateralert ↗</a></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">NWS Gaylord <span style="background:var(--success-bg);color:var(--success);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">RSS</span></div>
+      <div class="feed-title"><a href="https://www.weather.gov/apx/" target="_blank">Flood watches, warnings &amp; river forecasts — all 6 counties ↗</a></div>
+      <div class="feed-desc">RSS: <code style="font-size:11px;background:var(--sand);padding:1px 5px;border-radius:4px">weather.gov/source/apx/misc/warning_rss.xml</code></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">Grand Traverse County road closures · ArcGIS</div>
+      <div class="feed-title"><a href="https://experience.arcgis.com/experience/362fc509ce3f4227b79bb6ed242e2de5" target="_blank">Live road closure map — red segments are closed roads ↗</a></div>
+      <div class="feed-desc">Report new hazards at <a href="https://www.gtcrc.org/" target="_blank" style="color:#2e6a9e">gtcrc.org ↗</a></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">Michigan EGLE</div>
+      <div class="feed-title"><a href="https://www.michigan.gov/egle/about/organization/water-resources/flooding" target="_blank">EGLE flood response — emergency permits and water quality guidance ↗</a></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">Regional journalism</div>
+    <div class="feed-item">
+      <div class="feed-source">Interlochen Public Radio <span style="background:var(--info-bg);color:var(--info);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">Updating</span></div>
+      <div class="feed-title"><a href="https://www.interlochenpublicradio.org/2026-04-13/northern-michigan-flooding-resource-guide" target="_blank">Northern Michigan flood &amp; dam resource guide ↗</a></div>
+      <div class="feed-desc">Best single source for all 6 counties. RSS: <code style="font-size:11px;background:var(--sand);padding:1px 5px;border-radius:4px">interlochenpublicradio.org/tags/news.rss</code></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">WCMU Public Radio <span style="background:var(--info-bg);color:var(--info);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">Live blog</span></div>
+      <div class="feed-title"><a href="https://radio.wcmu.org/live-updates/live-updates-flooding-across-central-and-northern-michigan" target="_blank">Live updates: flooding across northern Michigan ↗</a></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">Mlive <span style="background:var(--info-bg);color:var(--info);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500;margin-left:4px">RSS</span></div>
+      <div class="feed-title"><a href="https://www.mlive.com/news/grand-rapids/" target="_blank">Mlive Grand Rapids / northern Michigan coverage ↗</a></div>
+      <div class="feed-desc">Covered FishPass flooding and Beitner bridge collapse. RSS: <code style="font-size:11px;background:var(--sand);padding:1px 5px;border-radius:4px">mlive.com/grand-rapids/news/index.ssf?/rss/grand_rapids.xml</code></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">Record-Eagle — Traverse City local</div>
+      <div class="feed-title"><a href="https://www.record-eagle.com" target="_blank">Traverse City Record-Eagle ↗</a></div>
+    </div>
+    <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">Treaty resources &amp; tribal</div>
+    <div class="feed-item">
+      <div class="feed-source">GLIFWC</div>
+      <div class="feed-title"><a href="https://www.glifwc.org" target="_blank">Great Lakes Indian Fish &amp; Wildlife Commission ↗</a></div>
+      <div class="feed-desc">Treaty fisheries, 1836 Ceded Territory monitoring. RSS: <code style="font-size:11px;background:var(--sand);padding:1px 5px;border-radius:4px">glifwc.org/feed</code></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">NCAI</div>
+      <div class="feed-title"><a href="https://www.ncai.org/policy-issues/tribal-governance/emergency-management" target="_blank">National Congress of American Indians — tribal emergency management ↗</a></div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-source">GTB public information</div>
+      <div class="feed-title"><a href="https://www.gtbindians.org/pubinfo.asp" target="_blank">GTB official public information releases ↗</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════ RIVER SCIENCE ════════════════════ -->
+<section id="panel-science" class="panel">
+  <div style="background:var(--forest);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:18px">
+    <div style="font-size:10px;color:var(--amber-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">River science &amp; flood information</div>
+    <div style="font-family:'Fraunces',serif;font-size:17px;font-weight:300;color:white;line-height:1.6;margin-bottom:6px">Understanding what is happening — and what to expect</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.7">Plain-language information about flooding, river behavior, and recovery. Content is managed from the <strong style="color:rgba(255,255,255,.85)">science</strong> tab in the Google Sheet — new entries appear here automatically. Sources are shown for each item.</div>
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="news-filter-btn active" onclick="filterScience(this,'all')">All topics</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'hydrology')">How rivers work</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'safety')">Safety</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'water quality')">Water quality</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'fish')">Fish &amp; fishing</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'dams')">Dams</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'recovery')">Recovery</button>
+    <button class="news-filter-btn" onclick="filterScience(this,'cultural')">Cultural</button>
+  </div>
+
+  <div id="science-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:14px">
+    <div class="loading-state" style="grid-column:1/-1"><span class="spinner"></span>Loading from sheet…</div>
+  </div>
+
+  <div class="card" style="font-size:12px;color:var(--text-soft);line-height:1.7">
+    Information here is drawn from publicly available scientific and technical sources including USGS, NOAA, Michigan DNR, and EGLE, as well as GTB Natural Resources knowledge. Each entry shows its source. This is an informational resource — for safety decisions, always follow guidance from official emergency management. For questions or contributions: <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e">eaacasey@gmail.com</a>
+  </div>
+</section>
+
+
+<!-- ════════════════════ NEWS ════════════════════ -->
+<section id="panel-news" class="panel">
+  <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.7">
+    News stories, articles, and links relevant to the flood response for GTB. Selected for their consistent updates and comprehensive, on-the-ground coverage, including photos, quotes, and local reporting. Suggestions welcome via email.
+  </p>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="news-filter-btn active" onclick="filterNews(this,'all')">All</button>
+    <button class="news-filter-btn" onclick="filterNews(this,'flood')">Flood</button>
+    <button class="news-filter-btn" onclick="filterNews(this,'tribal')">Tribal</button>
+    <button class="news-filter-btn" onclick="filterNews(this,'ecology')">Ecology</button>
+    <button class="news-filter-btn" onclick="filterNews(this,'fema')">FEMA</button>
+    <button class="news-filter-btn" onclick="filterNews(this,'strength')">Strengths</button>
+  </div>
+  <div id="news-grid" class="card">
+    <div class="loading-state"><span class="spinner"></span>Loading news from sheet…</div>
+  </div>
+</section>
+
+<!-- ════════════════════ MEDIA ════════════════════ -->
+<section id="panel-media" class="panel">
+  <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.7">
+    Photos, videos, field notes, and links — all managed from the <strong>media</strong> tab in your Google Sheet. Each row is one item.
+  </p>
+
+  <div class="sl">How to add media</div>
+  <div class="warn-banner" style="margin-bottom:16px">
+    In your Google Sheet <strong>media</strong> tab, each row is one item. Set the <strong>type</strong> column to one of:<br>
+    <strong>photo</strong> — paste a Google Drive share link into <strong>url</strong> (set to "Anyone with the link can view") ·
+    <strong>video</strong> — paste a YouTube, Vimeo, or news site URL ·
+    <strong>note</strong> — text-only field observation, no media needed ·
+    <strong>link</strong> — an article, report, or document<br>
+    Other columns: <strong>title</strong> · <strong>site</strong> · <strong>date</strong> · <strong>description</strong> · <strong>severity</strong> (minor/moderate/major) · <strong>fema_flag</strong> (yes/no)
+  </div>
+
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    <button class="news-filter-btn active" onclick="filterMedia(this,'all')">All</button>
+    <button class="news-filter-btn" onclick="filterMedia(this,'photo')">Photos</button>
+    <button class="news-filter-btn" onclick="filterMedia(this,'video')">Videos</button>
+    <button class="news-filter-btn" onclick="filterMedia(this,'note')">Field notes</button>
+    <button class="news-filter-btn" onclick="filterMedia(this,'link')">Links</button>
+    <button class="news-filter-btn" onclick="filterMedia(this,'fema')">FEMA flagged</button>
+  </div>
+
+  <div id="media-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:14px">
+    <div class="loading-state" style="grid-column:1/-1"><span class="spinner"></span>Loading media from sheet…</div>
+  </div>
+
+  <div class="sl">Documentation &amp; reporting</div>
+  <div class="card" style="font-size:13px;color:var(--text-mid);line-height:1.7">
+    Timestamped field photos and notes with site, damage type, and severity are critical for FEMA Public Assistance project worksheets and NOAA grant impact reporting. Document damage <strong>before cleanup begins</strong>. All metadata can be downloaded as CSV from Google Sheets for use in official reporting — verify requirements with FEMA Region 5 and your NOAA program officer.
+    <br><br>
+    If you have photos, videos, or other media to contribute, updates and corrections are welcome at <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e">eaacasey@gmail.com</a>
+    <br><br>
+    <button class="btn-outline" onclick="exportMediaCSV()">Download media log CSV</button>
+  </div>
+</section>
+
+<!-- ════════════════════ FEMA ════════════════════ -->
+<section id="panel-fema" class="panel">
+  <div class="warn-banner editable" contenteditable="false" data-key="mhp_note" data-label="MHP / FEMA note">Loading…</div>
+
+  <!-- Framing note — static, intentional -->
+  <div style="background:white;border:1px solid var(--border);border-left:3px solid var(--text-soft);border-radius:0 var(--radius) var(--radius) 0;padding:13px 16px;margin-bottom:18px;font-size:12px;color:var(--text-mid);line-height:1.8">
+    <strong style="display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-soft);margin-bottom:6px">A note on this document and its language</strong>
+    GTB's 2023 Natural Hazard Mitigation Plan is a FEMA-required instrument, written in FEMA's framework and approved under FEMA's criteria. It uses language like "vulnerability" and organizes GTB's territory by county boundaries — both of which reflect the federal planning framework rather than how the tribe describes itself or relates to its land and water. The plan is referenced here as a legal and financial asset that unlocks recovery funding and establishes GTB's eligibility as a direct applicant. It is not a description of who GTB is. GTB's own account of its relationship to this land, these waterways, and this community is expressed in the Tribal Council's goals, the natural resources department's restoration work, and the tribe's ongoing exercise of treaty rights. Those are the primary frame for this dashboard. Where specific entries in the Safety or Science tabs draw on the MHP for technical information — evacuation protocols, infrastructure assessments, mitigation actions — the relevant section is noted as a source.
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <a href="https://www.gtbindians.org/downloads/gtb_final_mhp_2023.pdf" target="_blank" style="color:#2e6a9e;text-decoration:none;font-size:11px">View 2023 GTB Natural Hazard Mitigation Plan PDF &#8599;</a>
+      &nbsp;&nbsp;
+      <a href="https://www.gtbindians.org/tribal_council.asp" target="_blank" style="color:#2e6a9e;text-decoration:none;font-size:11px">GTB 2025 Tribal Council Goals &#8599;</a>
+    </div>
+  </div>
+
+  <div class="sl">Recovery path</div>
+  <div class="paths">
+    <div class="path-card active" id="path-direct" onclick="selectPath('direct')">
+      <div class="path-title">Tribal direct applicant</div>
+      <div class="path-sub">GTB applies directly under Stafford Act §401. Full sovereignty over project worksheets.</div>
+      <span class="path-tag pt-direct">Maximum control</span>
+    </div>
+    <div class="path-card" id="path-state" onclick="selectPath('state')">
+      <div class="path-title">Work with the state</div>
+      <div class="path-sub">Michigan as grantee, GTB as subrecipient. Lower admin burden, less autonomy.</div>
+      <span class="path-tag pt-coord">Coordinated</span>
+    </div>
+    <div class="path-card" id="path-sub" onclick="selectPath('sub')">
+      <div class="path-title">Subcontract from state</div>
+      <div class="path-sub">GTB as vendor for specific scopes. Fast cash flow, limited strategic input.</div>
+      <span class="path-tag pt-managed">Limited control</span>
+    </div>
+  </div>
+  <div class="detail-box" id="path-detail">
+    <strong>Tribal direct applicant:</strong> GTB applies directly to FEMA PA program. Requires a Tribal Declaration request or piggyback on Michigan's DR. GTB controls project worksheets, procurement, and reporting — including how culturally and ecologically sensitive restoration sites are assessed and repaired. Must meet 2 CFR 200 procurement standards. Aligns with Tribal Council sovereignty goals. FEMA Tribal Liaison: (202) 646-3444.
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="sl">FEMA thresholds (FY2024)</div>
+      <div class="card" style="padding:0">
+        <div style="padding:0 16px">
+          <div class="threshold-row"><span class="tn">Statewide PA trigger</span><span class="tv">$9.1M</span></div>
+          <div class="threshold-row"><span class="tn">Per-capita indicator (MI)</span><span class="tv">$1.48</span></div>
+          <div class="threshold-row"><span class="tn">Tribal direct threshold</span><span class="tv">~$1M</span></div>
+          <div class="threshold-row"><span class="tn">Small project max</span><span class="tv">$179,900</span></div>
+          <div class="threshold-row"><span class="tn">Large project min</span><span class="tv">&gt;$179,900</span></div>
+          <div class="threshold-row"><span class="tn">Federal cost share</span><span class="tv">75%</span></div>
+        </div>
+        <p style="font-size:11px;color:var(--text-soft);padding:10px 16px;border-top:1px solid var(--border)">Verify with FEMA Region 5 before use in project worksheets.</p>
+      </div>
+    </div>
+    <div>
+      <div class="sl">PA categories — GTB site eligibility</div>
+      <div class="card" style="font-size:12px;color:var(--text-mid);line-height:2.1">
+        <strong>Cat. A</strong> — Debris removal (Crystal crossings, Boardman reaches)<br>
+        <strong>Cat. B</strong> — Emergency protective measures (backup power, sandbagging)<br>
+        <strong>Cat. C</strong> — Roads & bridges (Crystal crossings, Beitner area)<br>
+        <strong>Cat. D</strong> — Water control (stream bank, culverts)<br>
+        <strong>Cat. E</strong> — Buildings & equipment (stocking trailer, facilities)<br>
+        <span style="font-size:11px;color:var(--success)">✓ C–G only available to tribes with approved MHP — GTB qualifies</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl">Action checklist</div>
+  <div class="card" id="checklist">
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--danger)">Now</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>Photo document all impacted sites</strong> before any cleanup begins</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--danger)">48 hrs</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>Contact NOAA program officer</strong> — Lower River grant flood impact notification</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--danger)">72 hrs</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>Contact FEMA Tribal Liaison</strong> (202) 646-3444 — establish direct applicant status</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--warn)">1 week</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>Structural assessment</strong> — Crystal Stream Crossings 1–4 before vehicle traffic</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--warn)">1 week</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>FEMA recovery path decision</strong> — tribal direct vs. state subrecipient</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date" style="color:var(--warn)">2 weeks</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>GLIFWC coordination</strong> — report treaty fishery impacts during spring runs</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date">30 days</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>THPO consultation</strong> — before any ground-disturbing recovery work near sensitive areas</span></label></div></div>
+    <div class="checklist-row"><div class="checklist-date">30 days</div><div class="checklist-text"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" onchange="this.parentElement.parentElement.style.opacity=this.checked?'.4':'1'"><span><strong>Begin HMGP groundwork</strong> — post-disaster mitigation grant window now open</span></label></div></div>
+  </div>
+
+  <div class="sl">Field notes</div>
+  <div class="card">
+    <textarea class="notes-area" id="notes-fema" placeholder="FEMA path decisions, project worksheet numbers, agency contacts made, grant notes…"></textarea>
+    <button class="btn-outline" onclick="copyNotes('notes-fema')">Copy notes</button>
+  </div>
+</section>
+
+<!-- ════════════════════ CONTACTS ════════════════════ -->
+<section id="panel-contacts" class="panel">
+  <div class="sl">GTB emergency numbers</div>
+  <div class="emerg-grid" id="emerg-grid">
+    <div class="loading-state"><span class="spinner"></span>Loading contacts…</div>
+  </div>
+  <div class="sl">GTB departments <span class="live-tag">from sheet</span></div>
+  <div class="contact-grid" id="contacts-gtb">
+    <div class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+  <div class="sl">Federal & partner agencies</div>
+  <div class="contact-grid" id="contacts-federal">
+    <div class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+  <div class="sl">State & county</div>
+  <div class="contact-grid" id="contacts-state">
+    <div class="loading-state"><span class="spinner"></span>Loading…</div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <strong>About this dashboard</strong><br>
+      Built by an independent researcher and volunteer in solidarity with GTB Natural Resources Department. Not an official GTB publication. Made to support capacity during the April 2026 flood emergency.<br><br>
+      Updates, corrections, or resources to share are welcome.<br>
+      <a href="mailto:eaacasey@gmail.com" style="color:var(--amber-light)">eaacasey@gmail.com</a>
+    </div>
+    <div class="footer-col">
+      <strong>GTB resources</strong><br>
+      <a href="https://www.gtbindians.org/naturalresources.asp" target="_blank">GTB Natural Resources ↗</a><br>
+      <a href="https://www.gtbindians.org/ems.asp" target="_blank">GTB Emergency Management ↗</a><br>
+      <a href="https://www.gtbindians.org/downloads/gtb_final_mhp_2023.pdf" target="_blank">2023 Hazard Mitigation Plan ↗</a><br>
+      <a href="https://www.gtbindians.org/tribal_council.asp" target="_blank">Tribal Council Goals 2025 ↗</a>
+    </div>
+    <div class="footer-col">
+      <strong>Emergency contacts</strong><br>
+      GTB Emergency Mgmt: <a href="tel:2315347111">231-534-7111</a><br>
+      FEMA Region 5: <a href="tel:3124085500">(312) 408-5500</a><br>
+      FEMA Tribal Liaison: <a href="tel:2026463444">(202) 646-3444</a>
+    </div>
+  </div>
+  <div class="footer-disclaimer editable" contenteditable="false" data-key="footer_disclaimer" data-label="Footer disclaimer">
+    Loading…
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION — PASTE YOUR GOOGLE SHEET ID BELOW
+// Get it from your sheet URL: docs.google.com/spreadsheets/d/SHEET_ID_HERE/edit
+// After pasting, save the page and reload.
+// ═══════════════════════════════════════════════════════════
+const SHEET_ID = '19w6Yn0dfzM5LDy2hFIqM1g4iRkdQB7SDzCkYt_VIefE';
+
+// ── USGS gauges to monitor (site number : display name : serves)
+const GAUGES = [
+  {id:'04127200', name:'Boardman R. at Beitner Rd', serves:'Fish Pass / Lower River — GTB cooperative gauge'},
+  {id:'04127490', name:'Boardman R. at Union St',   serves:'Lower River (NOAA site)'},
+  {id:'04126991', name:'Boardman R. nr Mayfield',   serves:'Brown Bridge reach'},
+  {id:'04126610', name:'Crystal Lake Outlet',        serves:'Crystal crossings 1–4'},
+  {id:'04122500', name:'Manistee R. nr Sherman',     serves:'Regional context'},
+];
+
+// ═══════════════════════════════════════════════════════════
+// SHEET DATA LOADER
+// ═══════════════════════════════════════════════════════════
+const BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+let sheetData = {};
+
+async function fetchSheet(tab) {
+  const url = BASE + encodeURIComponent(tab);
+  const res = await fetch(url);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (line[i] === ',' && !inQuotes) {
+      result.push(current); current = '';
+    } else current += line[i];
+  }
+  result.push(current);
+  return result;
+}
+
+async function loadAllData() {
+  if (SHEET_ID === 'PASTE_YOUR_SHEET_ID_HERE') {
+    document.getElementById('data-status').textContent = '⚠ Sheet not connected';
+    document.getElementById('data-status').style.background = 'rgba(160,32,32,.3)';
+    loadFallbackData();
+    return;
+  }
+  try {
+    document.getElementById('data-status').textContent = '⟳ Loading sheet…';
+    const [narrative, counties, sites, contacts, timeline, news, media, statements, science, safety] = await Promise.all([
+      fetchSheet('narrative'),
+      fetchSheet('counties'),
+      fetchSheet('sites'),
+      fetchSheet('contacts'),
+      fetchSheet('timeline'),
+      fetchSheet('news'),
+      fetchSheet('media'),
+      fetchSheet('statements'),
+      fetchSheet('science'),
+      fetchSheet('safety'),
+    ]);
+    sheetData = {narrative, counties, sites, contacts, timeline, news, media, statements, science, safety};
+    document.getElementById('data-status').textContent = '✓ Sheet connected';
+    document.getElementById('data-status').style.background = 'rgba(26,92,53,.4)';
+    renderAll();
+  } catch(e) {
+    document.getElementById('data-status').textContent = '⚠ Sheet error — using built-in data';
+    document.getElementById('data-status').style.background = 'rgba(160,32,32,.3)';
+    loadFallbackData();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERERS
+// ═══════════════════════════════════════════════════════════
+function renderAll() {
+  renderNarrative();
+  renderTimeline();
+  renderCounties();
+  renderSites();
+  renderContacts();
+  renderStatements();
+  renderNews();
+  renderMedia();
+  renderScience();
+  renderSafety();
+}
+
+function getNarrative(key) {
+  if (!sheetData.narrative) return '';
+  const row = sheetData.narrative.find(r => r.key === key);
+  return row ? row.text : '';
+}
+
+function renderNarrative() {
+  const keys = ['alert_main','strength_main','press_briefing','state_declaration',
+    'mission_statement','mission_recovery','sovereignty_framing','mhp_note','ziigwan','footer_disclaimer'];
+  keys.forEach(key => {
+    const text = getNarrative(key);
+    if (!text) return;
+    // id-based elements
+    const byId = document.getElementById(key.replace(/_/g,'-') + '-text');
+    if (byId) byId.textContent = text;
+    // data-key elements
+    document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
+      el.textContent = text;
+    });
+  });
+  // alert banner needs innerHTML for strong tags
+  const alertText = getNarrative('alert_main');
+  if (alertText) document.getElementById('alert-main-text').innerHTML = '<strong>Active flood emergency — April 2026.</strong> ' + alertText.replace(/^Active flood emergency.*?2026\.\s*/,'');
+}
+
+function tagClass(tag) {
+  return {crit:'tg-crit',warn:'tg-warn',ok:'tg-ok',info:'tg-info'}[tag] || 'tg-info';
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timeline-container');
+  if (!sheetData.timeline || !sheetData.timeline.length) {
+    container.innerHTML = '<div class="loading-state">No timeline data</div>'; return;
+  }
+  container.innerHTML = sheetData.timeline.map(row => `
+    <div class="tl-row">
+      <div class="tl-date">${row.date || ''}</div>
+      <div class="tl-body">${row.event || ''}
+        ${row.tag_label ? `<span class="tl-tag ${tagClass(row.tag)}">${row.tag_label}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function statusClass(s) {
+  return {critical:'sc-critical',warning:'sc-warning',ok:'sc-ok'}[s] || 'sc-warning';
+}
+
+function renderCounties() {
+  const grid = document.getElementById('county-grid');
+  if (!sheetData.counties || !sheetData.counties.length) {
+    grid.innerHTML = '<div class="error-state">Could not load county data</div>'; return;
+  }
+  grid.innerHTML = sheetData.counties.map(c => `
+    <div class="county-card">
+      <div class="county-header" onclick="toggleCard('county-${c.id}')">
+        <div>
+          <div class="county-name">${c.name}</div>
+          <div class="county-sub">${c.summary ? c.summary.substring(0,80)+'…' : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="sc ${statusClass(c.status)}">${c.status_label}</span>
+          <span class="chev" id="chev-county-${c.id}">▼</span>
+        </div>
+      </div>
+      <div class="county-body" id="county-${c.id}">
+        ${c.bridge_note ? `<div class="bridge-note"><strong>Bridge:</strong> ${c.bridge_note}</div>` : ''}
+        ${c.dam_note ? `<div class="dam-note"><strong>Dam:</strong> ${c.dam_note}</div>` : ''}
+        <p>${c.summary || ''}</p>
+        ${c.gtb_note ? `<div class="gtb-note">${c.gtb_note}</div>` : ''}
+        <div class="county-links">
+          ${c.alert_url ? `<a href="${c.alert_url}" target="_blank">County alerts ↗</a>` : ''}
+          ${c.gauge_url ? `<a href="${c.gauge_url}" target="_blank">Stream gauge ↗</a>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+  // open first by default
+  if (sheetData.counties.length) toggleCard('county-' + sheetData.counties[0].id);
+}
+
+function dotClass(s) {
+  return {confirmed:'dot-confirmed',likely:'dot-likely',unknown:'dot-unknown'}[s] || 'dot-unknown';
+}
+
+function renderSites() {
+  const clusters = {boardman:'sites-boardman', crystal:'sites-crystal', north:'sites-north'};
+  Object.entries(clusters).forEach(([cluster, elId]) => {
+    const el = document.getElementById(elId);
+    const rows = (sheetData.sites || []).filter(s => s.cluster === cluster);
+    if (!rows.length) { el.innerHTML = '<div class="loading-state">No sites</div>'; return; }
+    const clLabel = {boardman:'cl-boardman',crystal:'cl-crystal',north:'cl-north'}[cluster] || '';
+    el.innerHTML = rows.map(s => `
+      <div class="site-row">
+        <div class="site-dot ${dotClass(s.status)}"></div>
+        <div style="flex:1">
+          <div class="site-name">${s.name}${s.noaa === 'true' ? ' <span style="font-size:10px;background:var(--info-bg);color:var(--info);padding:1px 6px;border-radius:8px;font-weight:500">NOAA grant</span>' : ''}</div>
+          <div class="site-desc">${s.description || ''}</div>
+          ${s.fema_category ? `<div style="font-size:11px;color:var(--text-soft);margin-top:3px">FEMA: ${s.fema_category}</div>` : ''}
+        </div>
+        <span class="site-cluster ${clLabel}">${s.cluster_label}</span>
+      </div>`).join('');
+  });
+}
+
+function renderContacts() {
+  const contacts = sheetData.contacts || [];
+  // emergency numbers
+  const urgent = contacts.filter(c => c.category === 'gtb' && c.phone);
+  document.getElementById('emerg-grid').innerHTML = urgent.map(c => `
+    <div class="emerg-item">
+      <div class="emerg-label">${c.role}</div>
+      <div class="emerg-num"><a href="tel:${c.phone.replace(/\D/g,'')}">${c.phone}</a></div>
+    </div>`).join('') || '<div>No contacts loaded</div>';
+
+  const groups = {
+    'contacts-gtb': contacts.filter(c => c.category === 'gtb'),
+    'contacts-federal': contacts.filter(c => c.category === 'federal'),
+    'contacts-state': contacts.filter(c => ['state','county'].includes(c.category)),
+  };
+  Object.entries(groups).forEach(([elId, rows]) => {
+    const el = document.getElementById(elId);
+    if (!rows.length) { el.innerHTML = ''; return; }
+    el.innerHTML = rows.map(c => `
+      <div class="contact-card">
+        <div class="contact-role">${c.role}</div>
+        <div class="contact-org">${c.org}</div>
+        <div class="contact-detail">
+          ${c.phone ? `📞 <a href="tel:${c.phone.replace(/\D/g,'')}">${c.phone}</a><br>` : ''}
+          ${c.email ? `📧 <a href="mailto:${c.email}">${c.email}</a><br>` : ''}
+          ${c.url ? `🌐 <a href="${c.url}" target="_blank">${c.url.replace(/https?:\/\//,'').substring(0,35)}…</a><br>` : ''}
+          ${c.notes ? `<span style="font-size:11px;color:var(--text-soft)">${c.notes}</span>` : ''}
+        </div>
+        <span class="ctag ctag-${c.category}">${c.category}</span>
+        ${c.priority === 'urgent' ? '<span class="ctag ctag-urgent">urgent</span>' : ''}
+      </div>`).join('');
+  });
+}
+
+function renderStatements() {
+  const container = document.getElementById('statements-container');
+  if (!container) return;
+  const statements = sheetData.statements || [];
+  if (!statements.length) {
+    container.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--text-soft)">Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a></div>';
+    return;
+  }
+  container.innerHTML = statements.map(s => {
+    const isStrength = (s.type || '').toLowerCase() === 'strength';
+    const sourceText = [s.date, s.source].filter(Boolean).join(' · ');
+    return `
+      <div class="statement-card ${isStrength ? 'strength-statement' : ''}">
+        <div class="statement-who">${s.who || ''}</div>
+        <div class="statement-quote">“${s.quote || ''}”</div>
+        <div class="statement-context">
+          ${sourceText}
+          ${s.url ? ` · <a href="${s.url}" target="_blank" style="color:var(--text-soft)">Source ↗</a>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIVE USGS API
+// ═══════════════════════════════════════════════════════════
+async function loadGauges() {
+  const ids = GAUGES.map(g => g.id).join(',');
+  const url = `https://waterservices.usgs.gov/nwis/iv/?format=json&sites=${ids}&parameterCd=00060,00065&siteStatus=active`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const values = data.value?.timeSeries || [];
+    const byId = {};
+    values.forEach(ts => {
+      const siteNo = ts.sourceInfo?.siteCode?.[0]?.value;
+      const param = ts.variable?.variableCode?.[0]?.value;
+      const val = parseFloat(ts.values?.[0]?.value?.[0]?.value);
+      if (!byId[siteNo]) byId[siteNo] = {};
+      if (param === '00065') byId[siteNo].stage = isNaN(val) ? null : val.toFixed(2);
+      if (param === '00060') byId[siteNo].flow = isNaN(val) ? null : Math.round(val).toLocaleString();
+    });
+
+    let floodCount = 0;
+    const tbody = document.getElementById('gauge-table-body');
+    tbody.innerHTML = GAUGES.map(g => {
+      const d = byId[g.id] || {};
+      const stage = d.stage || '—';
+      const flow = d.flow || '—';
+      const stageNum = parseFloat(d.stage);
+      let statusEl = '<span class="sp-loading">Checking…</span>';
+      if (d.stage !== undefined) {
+        if (stageNum > 12) { statusEl = '<span class="sp-major">Major flood</span>'; floodCount++; }
+        else if (stageNum > 8) { statusEl = '<span class="sp-flood">Flood warning</span>'; floodCount++; }
+        else if (stageNum > 5) { statusEl = '<span class="sp-warn">Monitor</span>'; }
+        else { statusEl = '<span class="sp-ok">Normal</span>'; }
+      }
+      return `
+        <tr>
+          <td><strong>${g.name}</strong></td>
+          <td style="font-size:11px;color:var(--text-soft)">${g.id}</td>
+          <td style="font-size:11px;color:var(--text-soft)">${g.serves}</td>
+          <td>${stage} ft</td>
+          <td>${flow} cfs</td>
+          <td>${statusEl}</td>
+          <td><a href="https://waterdata.usgs.gov/monitoring-location/${g.id}/" target="_blank">Live ↗</a></td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('gauge-count').textContent = floodCount > 0 ? floodCount + ' alert' + (floodCount>1?'s':'') : 'Normal';
+    document.getElementById('gauge-sub').textContent = floodCount > 0 ? 'Gauges at flood stage' : 'All gauges checked';
+  } catch(e) {
+    document.getElementById('gauge-table-body').innerHTML = `
+      <tr><td colspan="7" style="padding:12px;font-size:12px;color:var(--text-soft)">
+        Could not fetch live USGS data — check waterdata.usgs.gov directly. &nbsp;
+        <a href="https://waterwatch.usgs.gov/?m=real&r=mi" target="_blank" style="color:#2e6a9e">WaterWatch map ↗</a>
+      </td></tr>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RSS FEED via Claude API
+// ═══════════════════════════════════════════════════════════
+async function loadRSS() {
+  const container = document.getElementById('rss-container');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:`Fetch the Grand Traverse County Michigan Alert Center RSS feed at https://www.gtcountymi.gov/RSSFeed.aspx?ModID=63&CID=All-0 and return ONLY a JSON array of the current alerts, no markdown, like: [{"title":"...","date":"...","summary":"plain text 2-3 sentences no HTML","link":"https://www.gtcountymi.gov/AlertCenter.aspx"}]. If you cannot fetch it return what you know about the current April 2026 Michigan flooding alert from Grand Traverse County.`,
+        messages:[{role:'user',content:'Fetch and return the current Grand Traverse County flood alerts as JSON.'}],
+        tools:[{type:'web_search_20250305',name:'web_search'}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const match = text.match(/\[[\s\S]*\]/);
+    const alerts = match ? JSON.parse(match[0]) : [];
+    if (!alerts.length) throw new Error('no alerts');
+    container.innerHTML = alerts.map(a => `
+      <div class="feed-item">
+        <div class="feed-source">Grand Traverse County Alert Center · ${a.date || ''}</div>
+        <div class="feed-title"><a href="${a.link || 'https://www.gtcountymi.gov/AlertCenter.aspx'}" target="_blank">${a.title} ↗</a></div>
+        <div class="feed-desc">${a.summary}</div>
+      </div>`).join('') + `<div style="font-size:11px;color:var(--text-soft);margin-top:10px">Fetched ${new Date().toLocaleTimeString()} · <a href="https://www.gtcountymi.gov/AlertCenter.aspx" target="_blank" style="color:#2e6a9e">View all on county site ↗</a></div>`;
+  } catch(e) {
+    container.innerHTML = `
+      <div class="feed-item">
+        <div class="feed-source">Grand Traverse County Alert Center</div>
+        <div class="feed-title"><a href="https://www.gtcountymi.gov/AlertCenter.aspx" target="_blank">Local State of Emergency — Active ↗</a></div>
+        <div class="feed-desc">Local State of Emergency declared due to widespread flooding from rapid snowmelt and heavy rainfall. EOC activated. Press briefing Monday April 20 at 2:00 PM. Check county site for latest updates.</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:8px"><a href="https://www.gtcountymi.gov/AlertCenter.aspx" target="_blank" style="color:#2e6a9e">View live alerts on county site ↗</a></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// EDIT MODE
+// ═══════════════════════════════════════════════════════════
+let isEditing = false;
+let hasChanges = false;
+
+function toggleEditMode() {
+  isEditing = !isEditing;
+  document.body.classList.toggle('editing', isEditing);
+  document.getElementById('edit-banner').classList.toggle('show', isEditing);
+  document.getElementById('edit-btn').classList.toggle('active', isEditing);
+  document.getElementById('edit-btn').textContent = isEditing ? '✓ Done editing' : '✏️ Edit page';
+  document.querySelectorAll('.editable').forEach(el => {
+    el.contentEditable = isEditing ? 'true' : 'false';
+  });
+  if (!isEditing) {
+    document.getElementById('save-bar').classList.remove('show');
+  }
+}
+
+function exitEditMode() {
+  isEditing = false;
+  document.body.classList.remove('editing');
+  document.getElementById('edit-banner').classList.remove('show');
+  document.getElementById('edit-btn').classList.remove('active');
+  document.getElementById('edit-btn').textContent = '✏️ Edit page';
+  document.querySelectorAll('.editable').forEach(el => el.contentEditable = 'false');
+  document.getElementById('save-bar').classList.remove('show');
+  hasChanges = false;
+}
+
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('editable')) {
+    hasChanges = true;
+    document.getElementById('save-bar').classList.add('show');
+  }
+});
+
+function downloadPage() {
+  const clone = document.documentElement.cloneNode(true);
+  // remove save bar and edit mode state
+  clone.querySelector('#save-bar')?.remove();
+  clone.querySelector('#edit-banner')?.remove();
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('.editable').forEach(el => el.classList.remove('editable'));
+  clone.querySelector('body')?.classList.remove('editing');
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const a = document.createElement('a');
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+  a.download = 'gtb_flood_dashboard_updated_' + new Date().toISOString().split('T')[0] + '.html';
+  a.click();
+  exitEditMode();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FALLBACK DATA (when sheet not connected)
+// ═══════════════════════════════════════════════════════════
+function loadFallbackData() {
+  document.getElementById('alert-main-text').innerHTML = '<strong>Active flood emergency — April 2026.</strong> All 6 GTB service counties under Michigan State of Emergency and NWS flood warnings. Grand Traverse County local State of Emergency declared. Beitner Road bridge collapsed on the Boardman River. Statewide streamflow at ~202% of normal.';
+  document.getElementById('strength-main-text').textContent = 'Recent habitat restoration work completed at Fish Pass on the Boardman River likely prevented additional flood damage to the surrounding area, according to tribal officials. This is what GTB\'s long-term investment in ecological restoration looks like in practice.';
+  document.querySelectorAll('[data-key="press_briefing"]').forEach(el => el.textContent = '📅 Grand Traverse County press briefing: Monday April 20, 2026 at 2:00 PM. Follow for road repair updates and recovery timeline.');
+  document.querySelectorAll('[data-key="state_declaration"]').forEach(el => el.textContent = 'Governor Whitmer declared a State of Emergency for 32 Michigan counties on April 15, 2026. All 6 GTB service counties included: Grand Traverse, Leelanau, Benzie, Manistee, Charlevoix, and Antrim.');
+  document.querySelectorAll('[data-key="mission_statement"]').forEach(el => el.textContent = 'We, the Tribal Council of the Grand Traverse Band of Ottawa and Chippewa Indians, a Sovereign Nation, honor our ancestors and the rights preserved for our Tribal Nation. We shall promote and protect the well-being of our present and future members through culture, sovereignty, treaty rights, natural resources, health, public safety, education, financial management, housing and agriculture, and shall be responsive to the needs and statements of Tribal Members.');
+  document.querySelectorAll('[data-key="mission_recovery"]').forEach(el => el.textContent = 'The Fish Pass restoration work that officials say reduced flood damage is not separate from GTB\'s goals — it is the goals made visible. This recovery is an opportunity to demonstrate what tribal-led ecological stewardship means for community resilience.');
+  document.querySelectorAll('[data-key="sovereignty_framing"]').forEach(el => el.textContent = 'Pursuing a tribal direct applicant path with FEMA — rather than flowing through the state — is the expression of Dedibinezowin (sovereignty) in disaster response. It keeps GTB in control of how its land and restoration sites are assessed, documented, and repaired.');
+  document.querySelectorAll('[data-key="mhp_note"]').forEach(el => el.textContent = 'GTB\'s 2023 FEMA-approved Natural Hazard Mitigation Plan makes the tribe eligible for FEMA Public Assistance Categories C–G (permanent work) as a tribal direct applicant — covering restoration site repairs at 75% federal cost share.');
+  document.querySelectorAll('[data-key="ziigwan"]').forEach(el => el.textContent = 'Time of return — fish runs, first plants, planting, ceremony. Flooding during ziigwan carries particular significance for food sovereignty and treaty resources. GTB\'s restoration sites are in ecologically critical locations right now.');
+  document.querySelectorAll('[data-key="footer_disclaimer"]').forEach(el => el.textContent = 'This dashboard was built by an independent researcher and volunteer in solidarity with the Grand Traverse Band of Ottawa and Chippewa Indians Natural Resources Department. It is not an official GTB government publication. All FEMA thresholds and regulatory guidance should be verified with FEMA Region 5 and Michigan EMHSD before use in official project worksheets. Status information current as of April 2026 — conditions are evolving.');
+
+  // Fallback timeline
+  document.getElementById('timeline-container').innerHTML = [
+    ['Apr 13–14','Major rainfall on snowpack triggers rapid flooding across all 6 GTB service counties','crit','Active'],
+    ['Apr 15','Governor Whitmer declares State of Emergency for 32 counties including all 6 GTB service counties','crit','State declaration'],
+    ['Apr 15','Grand Traverse County declares local State of Emergency — EOC activated','crit','Local declaration'],
+    ['Apr 15','Beitner Road bridge collapses on the Boardman River south of Traverse City','crit','Infrastructure'],
+    ['Apr 15–16','Road closures and evacuations across Grand Traverse, Benzie, Antrim, and Charlevoix counties','warn','Access'],
+    ['Apr 16–17','Fish Pass and Crystal River restoration sites confirmed flooded — assessment underway','warn','Nat. Res.'],
+    ['Apr 17','Bellaire and Homestead dam levels stable and trending downward — elevated conditions remain','info','Update'],
+    ['Ongoing','Fish Pass restoration work noted by officials as likely having reduced downstream flood damage','ok','Strength'],
+    ['Apr 20 2pm','Grand Traverse County press briefing — follow for road repair updates and recovery timeline','info','Upcoming'],
+  ].map(([date,event,tag,label]) => `
+    <div class="tl-row">
+      <div class="tl-date">${date}</div>
+      <div class="tl-body">${event}<span class="tl-tag tg-${tag}">${label}</span></div>
+    </div>`).join('');
+
+  // Fallback counties
+  document.getElementById('county-grid').innerHTML = [
+    ['gtc','Grand Traverse County','critical','Critical','Local State of Emergency declared. EOC activated. Beitner Road bridge collapsed. Fish Pass and Lower Boardman flooding confirmed. Road closures and evacuations in effect.','Fish Pass restoration likely reduced downstream flood damage. Brown Bridge Dam reach also in this watershed.','','Beitner Road bridge collapsed on Boardman River south of Traverse City. Beitner Park closed.','https://www.gtcountymi.gov/AlertCenter.aspx','https://waterdata.usgs.gov/monitoring-location/04127200/'],
+    ['benz','Benzie County','critical','Critical','Crystal Stream Crossings 1–4 confirmed flooded. Structural assessment needed before any vehicle traffic. Road closures and sinkholes reported.','Crystal Stream Crossings directly in flood zone. FEMA Category C eligible.','Homestead Dam on Betsie River — state of emergency declared. Water levels decreasing but remain high.','','','https://waterdata.usgs.gov/monitoring-location/04126610/'],
+    ['ant','Antrim County','critical','Critical','Flash flood watch for downstream areas. Water levels stable and dropping as of Apr 17 but still historically high. Boat launches closed.','Coordinate with Antrim County PIO: pio@antrimcountymi.gov · 231-533-6265','Bellaire Dam at highest levels in recorded history (since 1970s). Built 1905. Earthen berm is weakest point.','','',''],
+    ['char','Charlevoix County','warning','Flood warning','Infrastructure damage confirmed. Flooding in rivers, creeks, and lakes across the county. BeAlert system covers Charlevoix, Cheboygan, Emmet: cceoa.com','GTB service area includes Charlevoix County. Contact county EM to confirm infrastructure details.','','','https://www.facebook.com/CharlevoixEM/',''],
+    ['lee','Leelanau County','warning','Flood warning','Included in Governor\'s state of emergency and active NWS flood warnings. GTB headquarters in Peshawbestown.','GTB headquarters and tribal lands in Peshawbestown. GTB EM coordinates directly with Leelanau County 911 per 2023 MHP.','','','http://www.leelanau.cc/emergencymgmt.asp',''],
+    ['man','Manistee County','critical','Major flood','Manistee River at major flood stage. East Branch Pine River at 476% of normal flow. Tippy Dam being monitored.','Manistee watershed relevant context for overall regional flood picture.','Tippy Dam — no imminent threat but elevated flows expected for several days.','','','https://waterdata.usgs.gov/monitoring-location/04122500/'],
+  ].map(([id,name,status,label,summary,gtb,dam,bridge,alertUrl,gaugeUrl]) => `
+    <div class="county-card">
+      <div class="county-header" onclick="toggleCard('fcounty-${id}')">
+        <div><div class="county-name">${name}</div><div class="county-sub">${summary.substring(0,70)}…</div></div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <span class="sc ${statusClass(status)}">${label}</span>
+          <span class="chev" id="chev-fcounty-${id}">▼</span>
+        </div>
+      </div>
+      <div class="county-body" id="fcounty-${id}">
+        ${bridge ? `<div class="bridge-note"><strong>Bridge:</strong> ${bridge}</div>` : ''}
+        ${dam ? `<div class="dam-note"><strong>Dam:</strong> ${dam}</div>` : ''}
+        <p>${summary}</p>
+        ${gtb ? `<div class="gtb-note">${gtb}</div>` : ''}
+        <div class="county-links">
+          ${alertUrl ? `<a href="${alertUrl}" target="_blank">County alerts ↗</a>` : ''}
+          ${gaugeUrl ? `<a href="${gaugeUrl}" target="_blank">Stream gauge ↗</a>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+  toggleCard('fcounty-gtc');
+
+  // Fallback sites
+  const fallbackSites = [
+    {name:'Fish Pass / Lower Boardman River',cluster:'boardman',cluster_label:'Boardman',lat:44.7647,lon:-85.6197,status:'confirmed',description:'Active NOAA-funded restoration site. Flooding confirmed. Document all damage before cleanup. Contact NOAA program officer within 48–72 hrs. Recent restoration work likely prevented additional downstream flood damage.',noaa:'true',fema_category:'Cat. B/E'},
+    {name:'Mitchell Creek',cluster:'boardman',cluster_label:'Boardman',status:'likely',description:'Stream restoration site, Boardman watershed. Assess access and channel condition.',noaa:'false',fema_category:'Cat. A/D'},
+    {name:'Brown Bridge Dam reach',cluster:'boardman',cluster_label:'Boardman',status:'likely',description:'Post-dam removal restoration (dam removed 2012). Assess spawning gravel and bank stability.',noaa:'false',fema_category:'Cat. A/D'},
+    {name:'Sturgeon & Greyling Stocking Trailer',cluster:'boardman',cluster_label:'Boardman',status:'unknown',description:'Fisheries stocking infrastructure. Assess access and operational condition during spring stocking season.',noaa:'false',fema_category:'Cat. E'},
+    {name:'Unnamed Sites A, B, C',cluster:'boardman',cluster_label:'Boardman',status:'unknown',description:'Three unnamed Boardman corridor sites (44.7618°N, 44.7080°N, 44.6986°N). Assess as access allows.',noaa:'false',fema_category:''},
+    {name:'Crystal Stream Crossing 4',cluster:'crystal',cluster_label:'Crystal River',status:'confirmed',description:'Culvert replacement – Tucker Outlet. Flooding confirmed. Structural check before any vehicle traffic.',noaa:'false',fema_category:'Cat. A/C'},
+    {name:'Crystal Stream Crossing 3 – The Tubes',cluster:'crystal',cluster_label:'Crystal River',status:'confirmed',description:'Timber bridge replacement. Flooding confirmed. Check for debris and scour at abutments.',noaa:'false',fema_category:'Cat. A/C'},
+    {name:'Crystal Stream Crossing 2',cluster:'crystal',cluster_label:'Crystal River',status:'confirmed',description:'Multi-span timber bridge. Flooding confirmed. Structural assessment needed.',noaa:'false',fema_category:'Cat. A/C'},
+    {name:'Crystal Stream Crossing 1',cluster:'crystal',cluster_label:'Crystal River',status:'confirmed',description:'Galvanized steel beam superstructure. Flooding confirmed. Assess footings and downstream scour.',noaa:'false',fema_category:'Cat. A/C'},
+    {name:'Mashkiigaki',cluster:'north',cluster_label:'North (Emmet Co.)',status:'likely',description:'Wetland restoration – formerly Timber Shores Campground. Assess flood extent, debris, and invasive seed load. Name means "the swamp place" in Anishinaabemowin.',noaa:'false',fema_category:'Cat. A'},
+    {name:'Getz Park',cluster:'north',cluster_label:'North (Emmet Co.)',status:'unknown',description:'Emmet County. Status not yet confirmed. Assess as access allows.',noaa:'false',fema_category:''},
+  ];
+  sheetData.sites = fallbackSites;
+  renderSites();
+
+  // Fallback contacts (emergency numbers)
+  document.getElementById('emerg-grid').innerHTML = [
+    ['GTB Emergency Management','231-534-7111'],
+    ['GTB Fire & Rescue','231-534-7666'],
+    ['GTB Tribal Police','231-534-7777'],
+    ['GTB Admin Switchboard','231-534-7750'],
+    ['GT County Central Dispatch','231-922-4550'],
+    ['FEMA Tribal Liaison','202-646-3444'],
+  ].map(([label,phone]) => `
+    <div class="emerg-item">
+      <div class="emerg-label">${label}</div>
+      <div class="emerg-num"><a href="tel:${phone.replace(/\D/g,'')}">${phone}</a></div>
+    </div>`).join('');
+
+  const fallbackContacts = [
+    {category:'gtb',role:'GTB Emergency Management',org:'Public Safety – Emergency Management',phone:'231-534-7111',email:'',url:'https://www.gtbindians.org/ems.asp',notes:'Primary flood response coordination. EOC activation, FEMA liaison, county coordination per 2023 MHP.',priority:'urgent'},
+    {category:'gtb',role:'GTB Natural Resources',org:'Natural Resources Department',phone:'',email:'',url:'https://www.gtbindians.org/naturalresources.asp',notes:'Site assessments, NOAA grant reporting, GLIFWC coordination, ecological monitoring, EGLE permitting.',priority:'urgent'},
+    {category:'gtb',role:'GTB Public Works',org:'Tribal Management – Public Works',phone:'',email:'',url:'https://www.gtbindians.org/publicworks.asp',notes:'Roads, facilities, infrastructure damage documentation for FEMA Categories A & B.',priority:'normal'},
+    {category:'gtb',role:'GTB THPO',org:'Tribal Historic Preservation Officer',phone:'',email:'',url:'https://www.gtbindians.org',notes:'Consult before any ground-disturbing recovery work near sacred sites, burial grounds, or ceremonial areas.',priority:'normal'},
+    {category:'federal',role:'FEMA Region 5',org:'Federal Emergency Management – Chicago',phone:'312-408-5500',email:'',url:'https://www.fema.gov/region/5',notes:'536 S. Clark St, Chicago IL',priority:'urgent'},
+    {category:'federal',role:'FEMA Tribal Liaison',org:'FEMA – Tribal Affairs',phone:'202-646-3444',email:'',url:'https://www.fema.gov/emergency-managers/tribal',notes:'Stafford Act §401 tribal direct applicant guidance.',priority:'urgent'},
+    {category:'federal',role:'GLIFWC',org:'Great Lakes Indian Fish & Wildlife Commission',phone:'715-682-6619',email:'',url:'https://www.glifwc.org',notes:'Treaty fisheries, 1836 Ceded Territory, ecological monitoring. Key partner for fishery impact documentation.',priority:'urgent'},
+    {category:'federal',role:'NOAA Program Officer',org:'NOAA – Lower River grant',phone:'',email:'',url:'https://www.fisheries.noaa.gov',notes:'ADD CONTACT. Notify within 48–72 hrs of flood impact to Lower River site.',priority:'urgent'},
+    {category:'state',role:'Michigan EMHSD',org:'State Emergency Management',phone:'',email:'',url:'https://www.michigan.gov/msp/divisions/emhsd',notes:'State grantee for FEMA PA. Contact if pursuing subrecipient path.',priority:'normal'},
+    {category:'county',role:'Antrim County PIO',org:'Antrim County',phone:'231-533-6265',email:'pio@antrimcountymi.gov',url:'',notes:'Janet Koch. Updates on Bellaire Dam situation.',priority:'normal'},
+  ];
+  sheetData.contacts = fallbackContacts;
+  renderContacts();
+
+  // Fallback statements — verbatim, fully attributed
+  sheetData.statements = [
+    {
+      who: 'FishPass project team — via Mlive reporting',
+      quote: 'The work that was being done at the FishPass site likely helped prevent further damage that could have occurred had the dam not been attended to.',
+      date: 'April 2026',
+      source: 'Mlive — "Traverse City flash flood swamps FishPass construction site" by Garrett Ellison',
+      url: '',
+      type: 'strength'
+    },
+    {
+      who: 'Nate Alger, Grand Traverse County Administrator',
+      quote: 'Declaring a local state of emergency in Michigan officially authorizes local officials to bypass normal procedures to swiftly respond to disasters. It enables the activation of emergency plans, deployment of special resources, potential implementation of travel restrictions, and authorizes spending to protect public health and safety.',
+      date: 'April 15, 2026',
+      source: 'Press conference following EOC activation. Grand Traverse County Alert Center. Quoted verbatim.',
+      url: 'https://www.gtcountymi.gov/AlertCenter.aspx',
+      type: 'standard'
+    },
+    {
+      who: 'Grand Traverse County Road Commission',
+      quote: 'The Road Commission has done a tremendous job strategically checking every road, culvert, and bridge in the County. They are clearing debris to mitigate further damage, setting priority levels for repairs, and evaluating the integrity of roadways to ensure their safety.',
+      date: 'April 17, 2026',
+      source: 'EOC update. Grand Traverse County Alert Center. Quoted verbatim from official release.',
+      url: 'https://www.gtcountymi.gov/AlertCenter.aspx',
+      type: 'standard'
+    },
+  ];
+  renderStatements();
+  renderScience();
+  renderSafety();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const panels = ['overview','safety','alerts','science','counties','ecological','sites','media','news','mission','fema','contacts'];
+  document.querySelectorAll('.nav-btn')[panels.indexOf(id)].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCard(id) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
+  if (!body) return;
+  const open = body.classList.contains('open');
+  document.querySelectorAll('.county-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('[id^="chev-"]').forEach(c => c.classList.remove('open'));
+  if (!open) { body.classList.add('open'); if(chev) chev.classList.add('open'); }
+}
+
+const pathDetails = {
+  direct:'<strong>Tribal direct applicant:</strong> GTB applies directly to FEMA PA program. Requires a Tribal Declaration request or piggyback on Michigan\'s DR. GTB controls project worksheets, procurement, and reporting — including how culturally and ecologically sensitive restoration sites are assessed and repaired. Must meet 2 CFR 200 standards. Aligns with Tribal Council sovereignty goals. FEMA Tribal Liaison: (202) 646-3444.',
+  state:'<strong>Work with the state (subrecipient):</strong> Michigan as FEMA grantee; GTB becomes a subrecipient. Reduces direct FEMA paperwork but state controls project scope approvals and timelines. May complicate restoration site work where GTB needs to control approach to ecologically sensitive areas.',
+  sub:'<strong>Subcontract from state:</strong> State contracts specific scopes to GTB departments or enterprises. Lowest admin burden, fastest cash flow, but no say in which projects get funded or overall recovery priorities.'
+};
+function selectPath(k) {
+  ['direct','state','sub'].forEach(p => document.getElementById('path-'+p).classList.toggle('active',p===k));
+  document.getElementById('path-detail').innerHTML = pathDetails[k];
+}
+
+function copyNotes(id) {
+  const t = document.getElementById(id).value;
+  if (!t) { alert('No notes to copy yet.'); return; }
+  navigator.clipboard.writeText(t).then(() => alert('Notes copied to clipboard.'));
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEWS
+// ═══════════════════════════════════════════════════════════
+let allNews = [];
+function renderNews() {
+  allNews = sheetData.news || [];
+  displayNews('all');
+}
+function displayNews(filter) {
+  const container = document.getElementById('news-grid');
+  if (!container) return;
+  const items = filter === 'all' ? allNews : allNews.filter(n => (n.tag||'').toLowerCase() === filter);
+  if (!items.length) {
+    container.innerHTML = `<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-soft)">${allNews.length === 0 ? 'Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a>' : 'No stories match this filter.'}</div>`;
+    return;
+  }
+  const tagClass = {flood:'nt-flood',tribal:'nt-tribal',ecology:'nt-ecology',fema:'nt-fema',strength:'nt-strength'};
+  container.innerHTML = items.map(n => `
+    <div class="news-item">
+      <div class="news-date">${n.date||''} ${n.source ? '· ' + n.source : ''}${n.tag ? `<span class="news-tag ${tagClass[n.tag.toLowerCase()]||''}">${n.tag}</span>` : ''}</div>
+      <div class="news-headline">${n.url ? `<a href="${n.url}" target="_blank">${n.headline||'Untitled'} ↗</a>` : (n.headline||'Untitled')}</div>
+      ${n.summary ? `<div class="news-summary">${n.summary}</div>` : ''}
+    </div>`).join('');
+}
+function filterNews(btn, filter) {
+  document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayNews(filter);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEDIA (unified photos, videos, notes, links)
+// ═══════════════════════════════════════════════════════════
+let allMedia = [];
+function renderMedia() {
+  allMedia = sheetData.media || [];
+  displayMedia('all');
+}
+function driveToThumb(url) {
+  if (!url) return null;
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const id = m1 ? m1[1] : m2 ? m2[1] : null;
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w400` : null;
+}
+function youtubeThumb(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+  return m ? `https://img.youtube.com/vi/${m[1]}/mqdefault.jpg` : null;
+}
+function displayMedia(filter) {
+  const grid = document.getElementById('media-grid');
+  if (!grid) return;
+  let items = allMedia;
+  if (filter === 'fema') items = allMedia.filter(m => (m.fema_flag||'').toLowerCase() === 'yes');
+  else if (filter !== 'all') items = allMedia.filter(m => (m.type||'').toLowerCase() === filter);
+  if (!items.length) {
+    grid.innerHTML = `<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-soft);grid-column:1/-1">${allMedia.length === 0 ? 'Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a>' : 'No items match this filter.'}</div>`;
+    return;
+  }
+  const sevClass = {major:'mt-major',moderate:'mt-moderate',minor:'mt-minor'};
+  const badgeClass = {photo:'mb-photo',video:'mb-video',note:'mb-note',link:'mb-link'};
+  grid.innerHTML = items.map(m => {
+    const type = (m.type||'link').toLowerCase();
+    let thumbUrl = null;
+    if (type === 'photo') thumbUrl = driveToThumb(m.url);
+    if (type === 'video') thumbUrl = youtubeThumb(m.url||'');
+    const femaTag = m.fema_flag && m.fema_flag.toLowerCase()==='yes' ? '<span class="media-tag mt-fema">FEMA doc</span>' : '';
+    const sevTag = m.severity ? `<span class="media-tag ${sevClass[m.severity.toLowerCase()]||''}">${m.severity}</span>` : '';
+    return `
+      <div class="media-card">
+        ${thumbUrl ? `<img src="${thumbUrl}" alt="${m.title||''}" loading="lazy" onerror="this.style.display='none'">` : ''}
+        ${!thumbUrl && type === 'video' ? `<div style="height:120px;background:var(--sand-dark);display:flex;align-items:center;justify-content:center;font-size:36px">▶️</div>` : ''}
+        ${!thumbUrl && type === 'note' ? `<div style="height:60px;background:var(--success-bg);display:flex;align-items:center;justify-content:center;font-size:24px">📝</div>` : ''}
+        ${!thumbUrl && type === 'link' ? `<div style="height:60px;background:var(--info-bg);display:flex;align-items:center;justify-content:center;font-size:24px">🔗</div>` : ''}
+        <div class="media-card-body">
+          <span class="media-type-badge ${badgeClass[type]||'mb-link'}">${type}</span>${femaTag}${sevTag}
+          <div class="media-title">${m.url ? `<a href="${m.url}" target="_blank">${m.title||'Untitled'} ↗</a>` : (m.title||'Untitled')}</div>
+          ${m.description ? `<div class="media-desc">${m.description}</div>` : ''}
+          <div class="media-meta">${m.site||''} ${m.date ? '· ' + m.date : ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+function filterMedia(btn, filter) {
+  document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayMedia(filter);
+}
+function exportMediaCSV() {
+  if (!allMedia.length) { alert('No media logged yet.'); return; }
+  const headers = ['type','title','site','date','damage_type','severity','fema_flag','description','url'];
+  const rows = allMedia.map(m => headers.map(hd => `"${(m[hd]||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'GTB_media_log_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAFETY
+// ═══════════════════════════════════════════════════════════
+function renderSafety() {
+  const items = (sheetData.safety || []).filter(s => (s.active||'yes').toLowerCase() !== 'no');
+  
+  const tiers = {
+    active:   {el:'safety-active-items',   cls:'safety-active'},
+    returning:{el:'safety-returning-items', cls:'safety-returning'},
+    food:     {el:'safety-food-items',      cls:'safety-food'},
+    elders:   {el:'safety-elders-items',    cls:'safety-elders'},
+  };
+
+  // Set class on containers for color theming
+  Object.entries(tiers).forEach(([tier, cfg]) => {
+    const el = document.getElementById(cfg.el);
+    if (!el) return;
+    const tierItems = items.filter(s => (s.tier||'').toLowerCase() === tier);
+    if (!tierItems.length) {
+      el.innerHTML = `<div style="font-size:12px;color:var(--text-soft);padding:10px 0">Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a></div>`;
+      return;
+    }
+    el.className = cfg.cls;
+    el.innerHTML = tierItems.map(s => `
+      <div class="safety-item">
+        <div class="safety-heading">${s.heading || ''}</div>
+        <div class="safety-body">${s.body || ''}</div>
+        ${s.source ? `<div class="safety-source">Source: ${s.source_url ? `<a href="${s.source_url}" target="_blank">${s.source} ↗</a>` : s.source}</div>` : ''}
+      </div>`).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RIVER SCIENCE
+// ═══════════════════════════════════════════════════════════
+let allScience = [];
+function renderScience() {
+  allScience = sheetData.science || [];
+  displayScience('all');
+}
+
+const tagLabels = {hydrology:'How rivers work', safety:'Safety', 'water quality':'Water quality', fish:'Fish & fishing', dams:'Dams', recovery:'Recovery', cultural:'Cultural'};
+
+function displayScience(filter) {
+  const grid = document.getElementById('science-grid');
+  if (!grid) return;
+  const items = filter === 'all' ? allScience : allScience.filter(s => (s.tag||'').toLowerCase() === filter.toLowerCase());
+  if (!items.length) {
+    grid.innerHTML = `<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-soft);grid-column:1/-1">Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(s => `
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px">
+      ${s.tag ? `<div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin-bottom:6px">${tagLabels[s.tag.toLowerCase()] || s.tag}</div>` : ''}
+      <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px;line-height:1.4">${s.heading || ''}</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.75;margin-bottom:10px">${s.body || ''}</div>
+      ${s.source ? `<div style="font-size:11px;color:var(--text-soft);padding-top:8px;border-top:1px solid var(--border)">
+        Source: ${s.source_url ? `<a href="${s.source_url}" target="_blank" style="color:#2e6a9e;text-decoration:none">${s.source} ↗</a>` : s.source}
+      </div>` : ''}
+    </div>`).join('');
+}
+
+function filterScience(btn, filter) {
+  document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayScience(filter);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById('ts-badge').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+// ═══════════════════════════════════════════════════════════
+// NEWS RENDERER
+// ═══════════════════════════════════════════════════════════
+let allNews = [];
+function renderNews() {
+  allNews = sheetData.news || [];
+  displayNews('all');
+}
+
+function displayNews(filter) {
+  const container = document.getElementById('news-grid');
+  if (!container) return;
+  const items = filter === 'all' ? allNews : allNews.filter(n => (n.tag||'').toLowerCase() === filter);
+  if (!items.length) {
+    container.innerHTML = `<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-soft)">${allNews.length === 0 ? 'Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a>' : 'No stories match this filter.'}</div>`;
+    return;
+  }
+  const tagClass = {flood:'nt-flood',tribal:'nt-tribal',ecology:'nt-ecology',fema:'nt-fema',strength:'nt-strength'};
+  container.innerHTML = items.map(n => `
+    <div class="news-item" data-tag="${(n.tag||'').toLowerCase()}">
+      <div class="news-date">${n.date||''} ${n.source ? '· ' + n.source : ''}
+        ${n.tag ? `<span class="news-tag ${tagClass[n.tag.toLowerCase()]||''}">${n.tag}</span>` : ''}
+      </div>
+      <div class="news-headline">
+        ${n.url ? `<a href="${n.url}" target="_blank">${n.headline||'Untitled'} ↗</a>` : (n.headline||'Untitled')}
+      </div>
+      ${n.summary ? `<div class="news-summary">${n.summary}</div>` : ''}
+    </div>`).join('');
+}
+
+function filterNews(btn, filter) {
+  document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayNews(filter);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PHOTO RENDERER
+// ═══════════════════════════════════════════════════════════
+let allPhotos = [];
+function renderPhotos() {
+  allPhotos = sheetData.photos || [];
+  displayPhotos('all');
+}
+
+// Convert Google Drive share link to direct image URL
+function driveToImg(url) {
+  if (!url) return null;
+  // handles both /file/d/ID/view and /open?id=ID formats
+  let id = null;
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m1) id = m1[1];
+  else if (m2) id = m2[1];
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w400` : null;
+}
+
+function displayPhotos(filter) {
+  const grid = document.getElementById('photo-grid');
+  if (!grid) return;
+  let items = allPhotos;
+  if (filter === 'fema') items = allPhotos.filter(p => (p.fema_flag||'').toLowerCase() === 'yes');
+  else if (filter !== 'all') items = allPhotos.filter(p => (p.site||'').toLowerCase().includes(filter));
+
+  if (!items.length) {
+    grid.innerHTML = `<div class="loading-state" style="grid-column:1/-1">
+      ${allPhotos.length === 0
+        ? 'Coming soon. Suggestions and contributions welcome — <a href="mailto:eaacasey@gmail.com" style="color:#2e6a9e;text-decoration:none">eaacasey@gmail.com</a>'
+        : 'No items match this filter.'}
+    </div>`;
+    return;
+  }
+  const sevClass = {major:'pt-major', moderate:'pt-moderate', minor:'pt-minor'};
+  grid.innerHTML = items.map(p => {
+    const imgUrl = driveToImg(p.drive_url);
+    return `
+      <div class="photo-card">
+        ${imgUrl
+          ? `<img src="${imgUrl}" alt="${p.description||'Field photo'}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : ''}
+        <div style="display:${imgUrl?'none':'flex'};width:100%;height:160px;background:var(--sand-dark);align-items:center;justify-content:center;font-size:28px">📷</div>
+        <div class="photo-card-body">
+          <div class="photo-site">${p.site||'Unknown site'}
+            ${p.fema_flag && p.fema_flag.toLowerCase()==='yes' ? '<span class="photo-tag pt-fema">FEMA doc</span>' : ''}
+            ${p.severity ? `<span class="photo-tag ${sevClass[p.severity.toLowerCase()]||''}">${p.severity}</span>` : ''}
+          </div>
+          <div class="photo-desc">${p.description||''}</div>
+          <div class="photo-meta">${p.date||''} ${p.damage_type ? '· ' + p.damage_type : ''}</div>
+          ${p.drive_url ? `<a href="${p.drive_url}" target="_blank" style="font-size:11px;color:#2e6a9e;text-decoration:none;margin-top:5px;display:inline-block">Open in Drive ↗</a>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterPhotos(btn, filter) {
+  document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  displayPhotos(filter);
+}
+
+function exportMediaCSV() {
+  if (!allPhotos.length) { alert('No photos logged yet.'); return; }
+  const headers = ['site','date','damage_type','severity','fema_flag','description','drive_url'];
+  const rows = allPhotos.map(p => headers.map(h => `"${(p[h]||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'GTB_photo_log_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+}
+
+loadAllData();
+loadGauges();
+loadRSS();
+</script>
+</body>
+</html>
